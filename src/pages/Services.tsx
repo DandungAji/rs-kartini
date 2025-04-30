@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -73,7 +72,7 @@ export default function Services() {
         {/* Services List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredServices.map((service: Service) => {
-            const Icon = LucideIcons[service.icon as keyof typeof LucideIcons] || LucideIcons.Activity;
+            const Icon = (LucideIcons[service.icon as keyof typeof LucideIcons] || LucideIcons.Activity) as React.ElementType;
             
             return (
               <Card key={service.id} id={service.id} className="hover:shadow-md transition-shadow">
@@ -92,6 +91,7 @@ export default function Services() {
           })}
         </div>
         
+        {/* No results message */}
         {filteredServices.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">No services matching your search criteria.</p>

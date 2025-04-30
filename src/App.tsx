@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
 // Main pages
@@ -40,74 +40,32 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Create router with all routes
-const router = createBrowserRouter([
-  // Public Routes
-  {
-    path: "/",
-    element: <Index />
-  },
-  {
-    path: "/doctor-schedule",
-    element: <DoctorSchedule />
-  },
-  {
-    path: "/services",
-    element: <Services />
-  },
-  {
-    path: "/contact",
-    element: <Contact />
-  },
-  {
-    path: "/about",
-    element: <About />
-  },
-  {
-    path: "/info",
-    element: <Info />
-  },
-  
-  // Admin Routes
-  {
-    path: "/admin/login",
-    element: <Login />
-  },
-  {
-    path: "/admin",
-    element: <ProtectedRoute><Dashboard /></ProtectedRoute>
-  },
-  {
-    path: "/admin/schedules",
-    element: <ProtectedRoute><Schedules /></ProtectedRoute>
-  },
-  {
-    path: "/admin/posts",
-    element: <ProtectedRoute><Posts /></ProtectedRoute>
-  },
-  {
-    path: "/admin/profile",
-    element: <ProtectedRoute><Profile /></ProtectedRoute>
-  },
-  {
-    path: "/admin/*",
-    element: <AdminNotFound />
-  },
-  
-  // 404 Route
-  {
-    path: "*",
-    element: <NotFound />
-  }
-]);
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <RouterProvider router={router} />
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Index />} />
+          <Route path="/doctor-schedule" element={<DoctorSchedule />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/info" element={<Info />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/admin/schedules" element={<ProtectedRoute><Schedules /></ProtectedRoute>} />
+          <Route path="/admin/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
+          <Route path="/admin/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/admin/*" element={<AdminNotFound />} />
+          
+          {/* 404 Route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
