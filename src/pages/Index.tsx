@@ -6,6 +6,8 @@ import { services } from "@/lib/mockData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Calendar, Clock, MapPin, Phone } from "lucide-react";
+// Import all icons that might be used by services
+import * as LucideIcons from "lucide-react";
 
 export default function Index() {
   // Featured services for the homepage
@@ -103,14 +105,15 @@ export default function Index() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredServices.map((service) => {
-              const Icon = require('lucide-react')[service.icon];
+              // Use dynamic icon import from the Lucide icons we imported above
+              const IconComponent = LucideIcons[service.icon as keyof typeof LucideIcons] || LucideIcons.Activity;
               
               return (
                 <Card key={service.id} className="border-none shadow-md hover:shadow-lg transition-shadow">
                   <CardContent className="p-6 text-center">
                     <div className="flex justify-center mb-4">
                       <div className="p-3 bg-secondary rounded-full">
-                        <Icon className="h-8 w-8 text-primary" />
+                        <IconComponent className="h-8 w-8 text-primary" />
                       </div>
                     </div>
                     <h3 className="text-xl font-bold mb-2">{service.name}</h3>
