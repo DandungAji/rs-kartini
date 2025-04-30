@@ -36,8 +36,8 @@ import { Badge } from "@/components/ui/badge";
 export default function Schedules() {
   const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDoctor, setSelectedDoctor] = useState<string>("");
-  const [selectedDay, setSelectedDay] = useState<string>("");
+  const [selectedDoctor, setSelectedDoctor] = useState<string>("all");
+  const [selectedDay, setSelectedDay] = useState<string>("all");
   
   // Dialog state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -45,8 +45,8 @@ export default function Schedules() {
   
   const filteredSchedules = schedules.filter((schedule) => {
     const doctor = doctors.find((d) => d.id === schedule.doctorId);
-    const doctorMatch = !selectedDoctor || schedule.doctorId === selectedDoctor;
-    const dayMatch = !selectedDay || schedule.day === selectedDay;
+    const doctorMatch = !selectedDoctor || selectedDoctor === "all" || schedule.doctorId === selectedDoctor;
+    const dayMatch = !selectedDay || selectedDay === "all" || schedule.day === selectedDay;
     const searchMatch =
       !searchTerm ||
       (doctor &&
@@ -113,7 +113,7 @@ export default function Schedules() {
                 <SelectValue placeholder="All doctors" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All doctors</SelectItem>
+                <SelectItem value="all">All doctors</SelectItem>
                 {doctors.map((doctor) => (
                   <SelectItem key={doctor.id} value={doctor.id}>
                     {doctor.name}
@@ -129,7 +129,7 @@ export default function Schedules() {
                 <SelectValue placeholder="All days" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All days</SelectItem>
+                <SelectItem value="all">All days</SelectItem>
                 {days.map((day) => (
                   <SelectItem key={day} value={day}>
                     {day}
@@ -251,7 +251,7 @@ export default function Schedules() {
               </Label>
               <div className="col-span-3">
                 <Select
-                  value={editingSchedule?.day || ""}
+                  value={editingSchedule?.day || "Monday"}
                   onValueChange={(value: any) =>
                     setEditingSchedule(prev => prev ? { ...prev, day: value } : null)
                   }
