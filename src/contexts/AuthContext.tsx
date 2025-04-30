@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type User = {
   id: string;
@@ -63,8 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("medhub_user");
   };
 
+  const contextValue = {
+    user,
+    login,
+    logout,
+    loading
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
