@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -166,21 +165,20 @@ export default function Schedules() {
               <label htmlFor="day" className="block text-sm font-medium text-gray-700 mb-1">
                 Day
               </label>
-              <Select
+              <select
+                className="w-full p-2 border rounded"
                 value={newSchedule.day}
-                onValueChange={(value) => setNewSchedule({...newSchedule, day: value})}
+                onChange={(e) => setNewSchedule({...newSchedule, day: e.target.value as "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday"})}
+                required
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Day" />
-                </SelectTrigger>
-                <SelectContent>
-                  {weekDays.map((day) => (
-                    <SelectItem key={day} value={day}>
-                      {day}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+              </select>
             </div>
             
             <div>

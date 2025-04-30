@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -237,18 +236,15 @@ export default function Posts() {
                 <div className="flex gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Status</label>
-                    <Select
+                    <select 
+                      className="w-full p-2 border rounded"
                       value={newPost.status}
-                      onValueChange={(value) => setNewPost({...newPost, status: value})}
+                      onChange={(e) => setNewPost({...newPost, status: e.target.value as "draft" | "published"})}
+                      required
                     >
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="published">Published</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                    </select>
                   </div>
                 </div>
                 
@@ -352,18 +348,14 @@ export default function Posts() {
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-1 block">Status</label>
-                  <Select
+                  <select 
+                    className="w-full p-2 border rounded"
                     value={editingPost.status}
-                    onValueChange={(value) => setEditingPost({...editingPost, status: value as "draft" | "published"})}
+                    onChange={(e) => setEditingPost({...editingPost, status: e.target.value as "draft" | "published"})}
                   >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                  </select>
                 </div>
                 
                 <Button onClick={handleUpdatePost}>
