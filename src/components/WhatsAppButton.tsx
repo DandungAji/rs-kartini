@@ -1,5 +1,5 @@
 
-import { WhatsApp } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -22,7 +22,7 @@ export default function WhatsAppButton({ phoneNumber, message = "Hello, I'd like
           className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg bg-green-500 hover:bg-green-600 z-50"
           onClick={() => window.open(whatsappUrl, "_blank")}
         >
-          <WhatsApp className="h-7 w-7 text-white" />
+          <MessageCircle className="h-7 w-7 text-white" />
         </Button>
       </TooltipTrigger>
       <TooltipContent side="left">
