@@ -106,14 +106,14 @@ export default function Index() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredServices.map((service) => {
               // Use dynamic icon import from the Lucide icons we imported above
-              const IconComponent = LucideIcons[service.icon as keyof typeof LucideIcons] || LucideIcons.Activity;
+              const LucideIcon = LucideIcons[service.icon as keyof typeof LucideIcons] || LucideIcons.Activity;
               
               return (
                 <Card key={service.id} className="border-none shadow-md hover:shadow-lg transition-shadow">
                   <CardContent className="p-6 text-center">
                     <div className="flex justify-center mb-4">
                       <div className="p-3 bg-secondary rounded-full">
-                        <IconComponent className="h-8 w-8 text-primary" />
+                        <LucideIcon className="h-8 w-8 text-primary" />
                       </div>
                     </div>
                     <h3 className="text-xl font-bold mb-2">{service.name}</h3>

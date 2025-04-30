@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { services } from "@/lib/mockData";
 import { Service } from "@/lib/types";
+import * as LucideIcons from "lucide-react";
 
 export default function Services() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,7 +73,7 @@ export default function Services() {
         {/* Services List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredServices.map((service: Service) => {
-            const Icon = require('lucide-react')[service.icon];
+            const Icon = LucideIcons[service.icon as keyof typeof LucideIcons] || LucideIcons.Activity;
             
             return (
               <Card key={service.id} id={service.id} className="hover:shadow-md transition-shadow">
