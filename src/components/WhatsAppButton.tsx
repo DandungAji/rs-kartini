@@ -19,7 +19,7 @@ export default function WhatsAppButton({ phoneNumber, message = "Hello, I'd like
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg bg-green-500 hover:bg-green-600 z-50"
+          className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg bg-kartini-green hover:bg-kartini-green/90 z-50"
           onClick={() => window.open(whatsappUrl, "_blank")}
         >
           <MessageCircle className="h-7 w-7 text-white" />
