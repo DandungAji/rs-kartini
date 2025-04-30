@@ -3,7 +3,7 @@ import { ReactNode, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, File, List, LogOut, Menu, User, X } from "lucide-react";
+import { Calendar, File, List, LogOut, Menu, User, Users, X } from "lucide-react";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -25,6 +25,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       name: "Dashboard", 
       path: "/admin", 
       icon: <List className="mr-2 h-5 w-5" /> 
+    },
+    { 
+      name: "Doctors", 
+      path: "/admin/doctors", 
+      icon: <Users className="mr-2 h-5 w-5" /> 
     },
     { 
       name: "Doctor Schedules", 

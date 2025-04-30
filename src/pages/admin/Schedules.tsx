@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -8,11 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { doctors, schedules as initialSchedules, departments } from "@/lib/mockData";
 import { Doctor, Schedule } from "@/lib/types";
-import { Calendar, Clock, Plus, Search, Trash, User } from "lucide-react";
+import { Calendar, Clock, Edit, Plus, Search, Trash, User } from "lucide-react";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function Schedules() {
   const { toast } = useToast();
-  const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules);
+  const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules.map(s => ({ ...s, status: 'active' }))); // Add status to existing schedules
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   
@@ -22,7 +26,10 @@ export default function Schedules() {
     startTime: "09:00",
     endTime: "17:00",
     location: "",
+    status: "active"
   });
+  
+  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   
   const weekDays = [
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
@@ -69,6 +76,7 @@ export default function Schedules() {
       startTime: newSchedule.startTime || "09:00",
       endTime: newSchedule.endTime || "17:00",
       location: newSchedule.location || "",
+      status: newSchedule.status as "active" | "inactive" || "active",
     };
     
     setSchedules([...schedules, scheduleToAdd]);
@@ -85,7 +93,23 @@ export default function Schedules() {
       startTime: "09:00",
       endTime: "17:00",
       location: "",
+      status: "active"
     });
+  };
+  
+  const handleUpdateSchedule = () => {
+    if (!editingSchedule) return;
+    
+    setSchedules(schedules.map(schedule => 
+      schedule.id === editingSchedule.id ? editingSchedule : schedule
+    ));
+    
+    toast({
+      title: "Schedule Updated",
+      description: "The schedule has been updated successfully.",
+    });
+    
+    setEditingSchedule(null);
   };
   
   const handleDeleteSchedule = (id: string) => {
@@ -94,6 +118,21 @@ export default function Schedules() {
     toast({
       title: "Schedule Deleted",
       description: "The schedule has been removed.",
+    });
+  };
+  
+  const toggleScheduleStatus = (id: string) => {
+    setSchedules(schedules.map(schedule => {
+      if (schedule.id === id) {
+        const newStatus = schedule.status === "active" ? "inactive" : "active";
+        return { ...schedule, status: newStatus };
+      }
+      return schedule;
+    }));
+    
+    toast({
+      title: "Status Updated",
+      description: "The schedule status has been toggled.",
     });
   };
   
@@ -218,6 +257,19 @@ export default function Schedules() {
             </div>
           </div>
           
+          <div className="flex items-center space-x-2 mt-4 mb-4">
+            <Switch 
+              id="schedule-status"
+              checked={newSchedule.status === "active"}
+              onCheckedChange={(checked) => 
+                setNewSchedule({...newSchedule, status: checked ? "active" : "inactive"})
+              }
+            />
+            <Label htmlFor="schedule-status">
+              Active Schedule
+            </Label>
+          </div>
+          
           <Button onClick={handleAddSchedule} className="mt-4">
             <Plus className="h-4 w-4 mr-2" />
             Add Schedule
@@ -244,7 +296,7 @@ export default function Schedules() {
                   const doctor = getDoctorById(schedule.doctorId);
                   
                   return (
-                    <Card key={schedule.id} className="hover:shadow-sm transition-shadow">
+                    <Card key={schedule.id} className={`hover:shadow-sm transition-shadow ${schedule.status === 'inactive' ? 'opacity-60' : ''}`}>
                       <CardContent className="p-4 flex justify-between items-center">
                         <div className="flex items-center">
                           <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center mr-3">
@@ -270,11 +322,107 @@ export default function Schedules() {
                             </div>
                           )}
                           
+                          <div className="flex items-center space-x-2">
+                            <Switch 
+                              id={`status-${schedule.id}`}
+                              checked={schedule.status === "active"}
+                              onCheckedChange={() => toggleScheduleStatus(schedule.id)}
+                              className="data-[state=checked]:bg-primary"
+                            />
+                            <span className="text-xs font-medium">
+                              {schedule.status === "active" ? "Active" : "Inactive"}
+                            </span>
+                          </div>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                              >
+                                <Edit size={16} />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Edit Schedule</DialogTitle>
+                              </DialogHeader>
+                              {setEditingSchedule(schedule)}
+                              <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <label htmlFor="edit-time-start" className="text-right text-sm">
+                                    Start Time
+                                  </label>
+                                  <Input
+                                    id="edit-time-start"
+                                    type="time"
+                                    className="col-span-3"
+                                    value={editingSchedule?.startTime || schedule.startTime}
+                                    onChange={(e) => setEditingSchedule(prev => 
+                                      prev ? { ...prev, startTime: e.target.value } : null
+                                    )}
+                                  />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <label htmlFor="edit-time-end" className="text-right text-sm">
+                                    End Time
+                                  </label>
+                                  <Input
+                                    id="edit-time-end"
+                                    type="time"
+                                    className="col-span-3"
+                                    value={editingSchedule?.endTime || schedule.endTime}
+                                    onChange={(e) => setEditingSchedule(prev => 
+                                      prev ? { ...prev, endTime: e.target.value } : null
+                                    )}
+                                  />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <label htmlFor="edit-location" className="text-right text-sm">
+                                    Location
+                                  </label>
+                                  <Input
+                                    id="edit-location"
+                                    className="col-span-3"
+                                    value={editingSchedule?.location || schedule.location || ""}
+                                    onChange={(e) => setEditingSchedule(prev => 
+                                      prev ? { ...prev, location: e.target.value } : null
+                                    )}
+                                  />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <div className="text-right text-sm">
+                                    Status
+                                  </div>
+                                  <div className="col-span-3 flex items-center space-x-2">
+                                    <Switch 
+                                      id={`edit-status-${schedule.id}`}
+                                      checked={editingSchedule?.status === "active"}
+                                      onCheckedChange={(checked) => setEditingSchedule(prev => 
+                                        prev ? { ...prev, status: checked ? "active" : "inactive" } : null
+                                      )}
+                                    />
+                                    <Label htmlFor={`edit-status-${schedule.id}`}>
+                                      {editingSchedule?.status === "active" ? "Active" : "Inactive"}
+                                    </Label>
+                                  </div>
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <DialogClose asChild>
+                                  <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button onClick={handleUpdateSchedule}>Save Changes</Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                          
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleDeleteSchedule(schedule.id)} 
-                            className="ml-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+                            className="text-red-500 hover:bg-red-50 hover:text-red-600"
                           >
                             <Trash size={16} />
                           </Button>

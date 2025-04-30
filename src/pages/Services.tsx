@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,10 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { services } from "@/lib/mockData";
 import { Service } from "@/lib/types";
 import * as LucideIcons from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Check } from "lucide-react";
 
 export default function Services() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Get unique categories
   const categories = useMemo(() => {
@@ -28,6 +34,12 @@ export default function Services() {
       return matchesSearch && matchesCategory;
     });
   }, [searchQuery, selectedCategory]);
+
+  // Handle service click to show detailed view
+  const handleServiceClick = (service: Service) => {
+    setSelectedService(service);
+    setDialogOpen(true);
+  };
 
   return (
     <>
@@ -75,7 +87,12 @@ export default function Services() {
             const Icon = (LucideIcons[service.icon as keyof typeof LucideIcons] || LucideIcons.Activity) as React.ElementType;
             
             return (
-              <Card key={service.id} id={service.id} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={service.id} 
+                id={service.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleServiceClick(service)}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
                     <div className="p-3 bg-secondary rounded-full mr-4">
@@ -97,6 +114,69 @@ export default function Services() {
             <p className="text-gray-500">No services matching your search criteria.</p>
           </div>
         )}
+        
+        {/* Service Detail Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            {selectedService && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-2xl flex items-center">
+                    {(() => {
+                      const Icon = (LucideIcons[selectedService.icon as keyof typeof LucideIcons] || LucideIcons.Activity) as React.ElementType;
+                      return <Icon className="h-6 w-6 text-primary mr-3" />;
+                    })()}
+                    {selectedService.name}
+                  </DialogTitle>
+                  <DialogDescription>
+                    <Badge variant="outline" className="mt-2">
+                      {selectedService.category}
+                    </Badge>
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="mt-4">
+                  <p className="text-gray-700 mb-6">{selectedService.description}</p>
+                  
+                  {selectedService.detailedDescription && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-medium mb-2">About This Service</h4>
+                      <p className="text-gray-600">{selectedService.detailedDescription}</p>
+                    </div>
+                  )}
+                  
+                  {selectedService.procedures && selectedService.procedures.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-medium mb-2">Procedures Included</h4>
+                      <ul className="space-y-1">
+                        {selectedService.procedures.map((procedure, index) => (
+                          <li key={index} className="flex items-start">
+                            <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                            <span>{procedure}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {selectedService.benefits && selectedService.benefits.length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-medium mb-2">Benefits</h4>
+                      <ul className="space-y-1">
+                        {selectedService.benefits.map((benefit, index) => (
+                          <li key={index} className="flex items-start">
+                            <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                            <span>{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
         
         {/* Additional Info */}
         <div className="mt-16 bg-secondary rounded-lg p-8">

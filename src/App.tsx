@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 // Admin pages
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
+import Doctors from "./pages/admin/Doctors";
 import Schedules from "./pages/admin/Schedules";
 import Posts from "./pages/admin/Posts";
 import Profile from "./pages/admin/Profile";
@@ -58,6 +59,7 @@ const App = () => (
           {/* Admin Routes */}
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/admin/doctors" element={<ProtectedRoute><Doctors /></ProtectedRoute>} />
           <Route path="/admin/schedules" element={<ProtectedRoute><Schedules /></ProtectedRoute>} />
           <Route path="/admin/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
           <Route path="/admin/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

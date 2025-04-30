@@ -22,6 +22,7 @@ export type Schedule = {
   startTime: string;
   endTime: string;
   location?: string;
+  status: "active" | "inactive";
 };
 
 export type Service = {
@@ -30,6 +31,9 @@ export type Service = {
   description: string;
   icon: string;
   category?: string;
+  detailedDescription?: string;
+  benefits?: string[];
+  procedures?: string[];
 };
 
 export type Post = {
