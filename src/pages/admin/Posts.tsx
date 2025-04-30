@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { posts as initialPosts, postCategories } from "@/lib/mockData";
 import { Post } from "@/lib/types";
 import { Calendar, Edit, Plus, Search, Trash } from "lucide-react";
+import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 export default function Posts() {
   const { toast } = useToast();
@@ -27,17 +31,19 @@ export default function Posts() {
     status: "draft",
   });
   
-  // Filter posts based on search, category and status
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         post.author.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
-    const matchesStatus = activeTab === "all" || 
-                         (activeTab === "published" && post.status === "published") ||
-                         (activeTab === "draft" && post.status === "draft");
-    
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+  // Sort posts by publishDate (newest first) then filter based on search, category and status
+  const filteredPosts = [...posts]
+    .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
+    .filter(post => {
+      const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           post.author.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
+      const matchesStatus = activeTab === "all" || 
+                           (activeTab === "published" && post.status === "published") ||
+                           (activeTab === "draft" && post.status === "draft");
+      
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
   
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -54,7 +60,7 @@ export default function Posts() {
       return;
     }
     
-    const currentDate = new Date().toISOString().split('T')[0];
+    const currentDate = newPost.publishDate || new Date().toISOString().split('T')[0];
     const newId = `${posts.length + 1}`;
     
     const postToAdd: Post = {
@@ -196,6 +202,45 @@ export default function Posts() {
               </div>
               
               <div>
+                <label htmlFor="publishDate" className="block text-sm font-medium text-gray-700 mb-1">
+                  Publish Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="publishDate"
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !newPost.publishDate && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {newPost.publishDate ? (
+                        format(new Date(newPost.publishDate), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={newPost.publishDate ? new Date(newPost.publishDate) : undefined}
+                      onSelect={(date) => 
+                        setNewPost({
+                          ...newPost, 
+                          publishDate: date ? date.toISOString().split('T')[0] : undefined
+                        })
+                      }
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              <div>
                 <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">
                   Summary (optional)
                 </label>
@@ -309,6 +354,38 @@ export default function Posts() {
                     onChange={(e) => setEditingPost({...editingPost, author: e.target.value})}
                   />
                 </div>
+              </div>
+              
+              <div>
+                <label htmlFor="editPublishDate" className="block text-sm font-medium text-gray-700 mb-1">
+                  Publish Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="editPublishDate"
+                      variant={"outline"}
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {format(new Date(editingPost.publishDate), "PPP")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={new Date(editingPost.publishDate)}
+                      onSelect={(date) => 
+                        setEditingPost({
+                          ...editingPost, 
+                          publishDate: date ? date.toISOString().split('T')[0] : editingPost.publishDate
+                        })
+                      }
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               
               <div>
@@ -457,3 +534,4 @@ export default function Posts() {
     ));
   }
 }
+

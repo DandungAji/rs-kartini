@@ -85,15 +85,17 @@ export default function Info() {
     return uniqueCategories;
   }, []);
 
-  // Filter posts based on search query and category
+  // Filter posts based on search query and category, and sort by date (newest first)
   const filteredPosts = useMemo(() => {
-    return mockPosts.filter(post => {
-      const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           post.author.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
-      return matchesSearch && matchesCategory && post.status === "published";
-    });
+    return mockPosts
+      .filter(post => {
+        const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            post.author.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
+        return matchesSearch && matchesCategory && post.status === "published";
+      })
+      .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
   }, [searchQuery, selectedCategory]);
 
   // Handle post click to show detailed view
@@ -117,7 +119,7 @@ export default function Info() {
         subtitle="Stay informed with health news, tips, and hospital updates"
       />
       
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-6 py-12">
         {/* Filters */}
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
@@ -258,3 +260,4 @@ export default function Info() {
     </>
   );
 }
+
