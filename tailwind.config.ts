@@ -25,11 +25,6 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
-				kartini: {
-					green: '#21AC78', // Green from logo
-					orange: '#F97316', // Orange from logo
-					lightGreen: '#E6F7F1', // Light green background
-				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
