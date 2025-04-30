@@ -21,6 +21,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Doctors from "./pages/admin/Doctors";
 import Schedules from "./pages/admin/Schedules";
 import Posts from "./pages/admin/Posts";
+import MasterData from "./pages/admin/MasterData";
 import Profile from "./pages/admin/Profile";
 import AdminNotFound from "./pages/admin/NotFound";
 
@@ -64,6 +65,7 @@ const App = () => {
             <Route path="/admin/doctors" element={<ProtectedRoute><Doctors /></ProtectedRoute>} />
             <Route path="/admin/schedules" element={<ProtectedRoute><Schedules /></ProtectedRoute>} />
             <Route path="/admin/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
+            <Route path="/admin/master-data" element={<ProtectedRoute><MasterData /></ProtectedRoute>} />
             <Route path="/admin/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/admin/*" element={<AdminNotFound />} />
             

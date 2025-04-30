@@ -3,7 +3,7 @@ import { ReactNode, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, File, List, LogOut, Menu, User, Users, X } from "lucide-react";
+import { Calendar, Database, File, List, LogOut, Menu, User, Users, X } from "lucide-react";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -40,6 +40,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       name: "Posts", 
       path: "/admin/posts", 
       icon: <File className="mr-2 h-5 w-5" /> 
+    },
+    { 
+      name: "Master Data", 
+      path: "/admin/master-data", 
+      icon: <Database className="mr-2 h-5 w-5" /> 
     },
     { 
       name: "Profile", 
