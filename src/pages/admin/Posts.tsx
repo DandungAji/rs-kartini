@@ -10,10 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { posts as initialPosts, postCategories } from "@/lib/mockData";
 import { Post } from "@/lib/types";
-import { Calendar, Edit, Plus, Search, Trash } from "lucide-react";
+import { Calendar as CalendarIcon, Edit, Plus, Search, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
 
 export default function Posts() {
   const { toast } = useToast();
@@ -215,7 +216,7 @@ export default function Posts() {
                         !newPost.publishDate && "text-muted-foreground"
                       )}
                     >
-                      <Calendar className="mr-2 h-4 w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4" />
                       {newPost.publishDate ? (
                         format(new Date(newPost.publishDate), "PPP")
                       ) : (
@@ -234,7 +235,6 @@ export default function Posts() {
                         })
                       }
                       initialFocus
-                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -367,7 +367,7 @@ export default function Posts() {
                       variant={"outline"}
                       className="w-full justify-start text-left font-normal"
                     >
-                      <Calendar className="mr-2 h-4 w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4" />
                       {format(new Date(editingPost.publishDate), "PPP")}
                     </Button>
                   </PopoverTrigger>
@@ -382,7 +382,6 @@ export default function Posts() {
                         })
                       }
                       initialFocus
-                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -470,7 +469,7 @@ export default function Posts() {
     if (posts.length === 0) {
       return (
         <div className="bg-gray-50 border rounded-lg p-8 text-center">
-          <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+          <CalendarIcon className="h-12 w-12 mx-auto text-gray-400 mb-3" />
           <h3 className="text-lg font-medium text-gray-900 mb-1">No Posts Found</h3>
           <p className="text-gray-500 mb-4">
             There are no posts matching your search criteria.
@@ -534,4 +533,3 @@ export default function Posts() {
     ));
   }
 }
-
