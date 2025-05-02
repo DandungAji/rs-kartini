@@ -15,7 +15,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Total Doctors</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Total Dokter</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
@@ -27,7 +27,7 @@ export default function Dashboard() {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Total Schedules</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Total Jadwal</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
@@ -39,7 +39,7 @@ export default function Dashboard() {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Published Posts</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Postingan dipublikasikan</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
@@ -51,7 +51,7 @@ export default function Dashboard() {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Draft Posts</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Postingan didraf</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
@@ -65,7 +65,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Doctors Added</CardTitle>
+            <CardTitle>Dokter Terbaru Ditambahkan</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -90,7 +90,7 @@ export default function Dashboard() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Recent Posts</CardTitle>
+            <CardTitle>Postingan Terbaru</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

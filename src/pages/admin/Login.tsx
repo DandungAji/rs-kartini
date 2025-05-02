@@ -57,15 +57,10 @@ export default function Login() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
         <div className="text-center">
           <div className="flex justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-12 w-12 text-primary">
-              <path d="M8 19h8a4 4 0 0 0 0-8h-8a4 4 0 0 0 0 8Z"></path>
-              <path d="M8 5v4"></path>
-              <path d="M16 5v4"></path>
-              <path d="M12 5v14"></path>
-            </svg>
+          <img src="/images/logo.png" alt="" className="h-16 mr-2" />
           </div>
-          <h2 className="mt-4 text-2xl font-bold">MedHub Admin</h2>
-          <p className="mt-2 text-gray-600">Sign in to your account</p>
+          <h2 className="mt-4 text-2xl font-bold">Admin RS Kartini</h2>
+          <p className="mt-2 text-gray-600">Masuk ke akun anda</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
@@ -123,7 +118,7 @@ export default function Login() {
             href="/"
             className="text-sm text-primary hover:underline"
           >
-            Back to Website
+            Kembali ke Website
           </a>
         </div>
       </div>

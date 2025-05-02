@@ -11,15 +11,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-primary mr-2">
-                <path d="M8 19h8a4 4 0 0 0 0-8h-8a4 4 0 0 0 0 8Z"></path>
-                <path d="M8 5v4"></path>
-                <path d="M16 5v4"></path>
-                <path d="M12 5v14"></path>
-              </svg>
-              <span className="font-bold text-xl text-white">MedHub</span>
+              <img src="/images/logo.png" alt="" className="h-16 mr-2" />
+              {/* <span className="font-bold text-xl text-white">RS Kartini</span> */}
             </div>
-            <p className="mb-4">Providing quality healthcare services with care and compassion since 1990.</p>
+            <p className="mb-4">Kami ada untuk melayani anda.</p>
           </div>
           
           <div>
@@ -49,26 +44,22 @@ export default function Footer() {
             <ul className="space-y-2">
               <li className="flex items-center">
                 <Phone size={18} className="mr-2 text-primary" />
-                <span>+1 (555) 123-4567</span>
+                <span>+62 878 1988 1010</span>
               </li>
               <li className="flex items-center">
                 <Mail size={18} className="mr-2 text-primary" />
-                <span>contact@medhub.com</span>
+                <span>marketing@rskartini.id</span>
               </li>
-              <li className="flex items-center">
+              <li className="flex">
                 <MapPin size={18} className="mr-2 text-primary" />
-                <span>123 Hospital Street, Medical District</span>
-              </li>
-              <li className="flex items-center">
-                <Clock size={18} className="mr-2 text-primary" />
-                <span>Mon-Fri: 8AM-6PM</span>
+                <span>Jl. Pahlawan No.48, Kota Bandung, Jawa Barat</span>
               </li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p>&copy; {currentYear} MedHub. All rights reserved.</p>
+          <p>&copy; {currentYear} IT RS Kartini. All rights reserved.</p>
         </div>
       </div>
     </footer>

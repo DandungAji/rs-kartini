@@ -23,17 +23,17 @@ export default function Index() {
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 md:pr-8 text-center md:text-left mb-10 md:mb-0">
               <h1 className="text-3xl md:text-5xl font-bold mb-6">
-                Excellence in Healthcare, Compassion in Service
+              Jangan Lewatkan Kesempatan Terbaik
               </h1>
               <p className="text-lg md:text-xl mb-8 opacity-90">
-                MedHub Hospital provides comprehensive medical services with cutting-edge technology and a patient-centered approach.
+              Selalu pantau website kami untuk informasi eksklusif dan penawaran spesial
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Button asChild size="lg" className="font-semibold">
-                  <Link to="/doctor-schedule">Find a Doctor</Link>
+                  <Link to="/doctor-schedule">Cari Dokter</Link>
                 </Button>
                 <Button asChild variant="secondary" size="lg">
-                  <Link to="/services">Our Services</Link>
+                  <Link to="/services">Layanan Kami</Link>
                 </Button>
               </div>
             </div>
@@ -56,8 +56,8 @@ export default function Index() {
               <CardContent className="p-6 flex items-center">
                 <Phone className="h-10 w-10 text-primary mr-4" />
                 <div>
-                  <h3 className="font-semibold text-lg">Emergency</h3>
-                  <p className="text-gray-600">(555) 123-4567</p>
+                  <h3 className="font-semibold text-lg">Kontak Darurat</h3>
+                  <p className="text-gray-600">+62 851-7964-8841</p>
                 </div>
               </CardContent>
             </Card>
@@ -86,8 +86,8 @@ export default function Index() {
               <CardContent className="p-6 flex items-center">
                 <MapPin className="h-10 w-10 text-primary mr-4" />
                 <div>
-                  <h3 className="font-semibold text-lg">Location</h3>
-                  <p className="text-gray-600">123 Hospital St.</p>
+                  <h3 className="font-semibold text-lg">Lokasi</h3>
+                  <p className="text-gray-600">Jl. Pahlawan</p>
                 </div>
               </CardContent>
             </Card>
@@ -98,9 +98,9 @@ export default function Index() {
       {/* Featured Services */}
       <section className="section">
         <div className="container mx-auto px-4">
-          <h2 className="section-title">Our Services</h2>
+          <h2 className="section-title">Layanan Kami</h2>
           <p className="section-subtitle">
-            Providing comprehensive healthcare services with cutting-edge technology and compassionate care.
+          Temukan beragam layanan spesialis dan fasilitas pendukung kesehatan yang siap melayani Anda dengan sepenuh hati.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -119,7 +119,7 @@ export default function Index() {
                     <h3 className="text-xl font-bold mb-2">{service.name}</h3>
                     <p className="text-gray-600 mb-4">{service.description}</p>
                     <Button asChild variant="link" className="text-primary">
-                      <Link to={`/services#${service.id}`}>Learn More</Link>
+                      <Link to={`/services#${service.id}`}>Baca Selengkapnya</Link>
                     </Button>
                   </CardContent>
                 </Card>

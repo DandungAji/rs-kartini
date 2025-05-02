@@ -18,7 +18,7 @@ export type Department = {
 export type Schedule = {
   id: string;
   doctorId: string;
-  day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+  day: "Senin" | "Selasa" | "Rabu" | "Kamis" | "Jumat" | "Sabtu";
   startTime: string;
   endTime: string;
   location?: string;

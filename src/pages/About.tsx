@@ -10,7 +10,7 @@ export default function About() {
       <Navbar />
       
       <PageHeader 
-        title="About MedHub Hospital" 
+        title="About Rumah Sakit Kartini" 
         subtitle="Excellence in healthcare since 1990"
       />
       
@@ -21,13 +21,13 @@ export default function About() {
             <div>
               <h2 className="text-3xl font-bold mb-6">Our History</h2>
               <p className="text-gray-700 mb-4">
-                Founded in 1990, MedHub Hospital began as a small community clinic with a team of dedicated medical professionals committed to providing quality healthcare to the local community.
+                Founded in 1990, Rumah Sakit Kartini began as a small community clinic with a team of dedicated medical professionals committed to providing quality healthcare to the local community.
               </p>
               <p className="text-gray-700 mb-4">
                 Over the years, we've expanded our facilities and services, growing into a comprehensive medical center while maintaining our commitment to patient-centered care and clinical excellence.
               </p>
               <p className="text-gray-700">
-                Today, MedHub Hospital stands as a leading healthcare provider, equipped with state-of-the-art technology and staffed by top medical specialists across various disciplines.
+                Today, Rumah Sakit Kartini stands as a leading healthcare provider, equipped with state-of-the-art technology and staffed by top medical specialists across various disciplines.
               </p>
             </div>
             <div className="order-first md:order-last">
@@ -99,7 +99,7 @@ export default function About() {
             <TabsContent value="mission" className="p-6 bg-secondary rounded-lg mt-4">
               <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
               <p className="text-gray-700 mb-4">
-                At MedHub Hospital, our mission is to provide accessible, high-quality healthcare services to our community. We strive to deliver compassionate care that addresses not just the physical, but also the emotional and social well-being of each patient.
+                At Rumah Sakit Kartini, our mission is to provide accessible, high-quality healthcare services to our community. We strive to deliver compassionate care that addresses not just the physical, but also the emotional and social well-being of each patient.
               </p>
               <p className="text-gray-700">
                 We are committed to continuously improving our services through education, research, and the implementation of evidence-based practices, ensuring that we meet the evolving healthcare needs of the diverse population we serve.
@@ -108,7 +108,7 @@ export default function About() {
             <TabsContent value="vision" className="p-6 bg-secondary rounded-lg mt-4">
               <h3 className="text-2xl font-bold mb-4">Our Vision</h3>
               <p className="text-gray-700 mb-4">
-                We envision MedHub Hospital as a leader in healthcare innovation and excellence, recognized for our exceptional patient outcomes, cutting-edge medical technology, and dedicated healthcare professionals.
+                We envision Rumah Sakit Kartini as a leader in healthcare innovation and excellence, recognized for our exceptional patient outcomes, cutting-edge medical technology, and dedicated healthcare professionals.
               </p>
               <p className="text-gray-700">
                 We aim to be the healthcare provider of choice, known for fostering a healing environment where patients feel valued, respected, and empowered in their healthcare journey. Through strategic partnerships and community engagement, we aspire to contribute significantly to improving the overall health and wellness of our community.

@@ -9,14 +9,14 @@ export default function AdminNotFound() {
         <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
         <p className="text-xl text-gray-600 mb-6">Admin page not found</p>
         <p className="text-gray-500 mb-8">
-          The admin page you were looking for doesn't exist or you may not have access to it.
+        Halaman admin yang Anda cari tidak ada atau Anda mungkin tidak memiliki akses ke sana.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild>
             <Link to="/admin">Admin Dashboard</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/">Return to Website</Link>
+            <Link to="/">Kembali ke Website</Link>
           </Button>
         </div>
       </div>

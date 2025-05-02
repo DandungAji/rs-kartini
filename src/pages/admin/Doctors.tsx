@@ -114,7 +114,7 @@ export default function Doctors() {
   return (
     <AdminLayout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold mb-4 md:mb-0">Doctors Management</h1>
+        <h1 className="text-2xl font-bold mb-4 md:mb-0">Manajemen Dokter</h1>
         <div className="flex gap-2">
           <Select
             value={selectedDepartment}
@@ -124,7 +124,7 @@ export default function Doctors() {
               <SelectValue placeholder="Department" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Specializations</SelectItem>
+              <SelectItem value="all">Semua Spesialisasi</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept.id} value={dept.name}>
                   {dept.name}
@@ -146,13 +146,13 @@ export default function Doctors() {
       
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle className="text-lg">Add New Doctor</CardTitle>
+          <CardTitle className="text-lg">Tambah Dokter Baru</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Name
+                Nama
               </label>
               <Input
                 id="name"
@@ -164,7 +164,7 @@ export default function Doctors() {
             
             <div>
               <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 mb-1">
-                Specialization
+                Spesialisasi
               </label>
               <Select
                 value={newDoctor.specialization}
@@ -190,7 +190,7 @@ export default function Doctors() {
               <Input
                 id="email"
                 type="email"
-                placeholder="doctor@medhub.com"
+                placeholder="dokter@rskartini.id"
                 value={newDoctor.email}
                 onChange={(e) => setNewDoctor({...newDoctor, email: e.target.value})}
               />
@@ -198,11 +198,11 @@ export default function Doctors() {
             
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone
+                Nomor Telepon
               </label>
               <Input
                 id="phone"
-                placeholder="(555) 123-4567"
+                placeholder="(62) 123-4567"
                 value={newDoctor.phone}
                 onChange={(e) => setNewDoctor({...newDoctor, phone: e.target.value})}
               />
@@ -214,7 +214,7 @@ export default function Doctors() {
               </label>
               <Textarea
                 id="bio"
-                placeholder="Brief professional biography"
+                placeholder="Dokter Anak Profesional"
                 value={newDoctor.bio}
                 onChange={(e) => setNewDoctor({...newDoctor, bio: e.target.value})}
                 className="min-h-[100px]"
@@ -224,22 +224,22 @@ export default function Doctors() {
           
           <Button onClick={handleAddDoctor} className="mt-4">
             <Plus className="h-4 w-4 mr-2" />
-            Add Doctor
+            Tambah Dokter
           </Button>
         </CardContent>
       </Card>
       
-      <h2 className="text-lg font-medium mb-4">Doctor List</h2>
+      <h2 className="text-lg font-medium mb-4">Daftar Dokter</h2>
       
       {filteredDoctors.length > 0 ? (
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Specialization</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead className="w-[100px] text-right">Actions</TableHead>
+                <TableHead>Nama</TableHead>
+                <TableHead>Spesialisasi</TableHead>
+                <TableHead>Kontak</TableHead>
+                <TableHead className="w-[100px] text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -264,13 +264,13 @@ export default function Doctors() {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Edit Doctor</DialogTitle>
+                          <DialogTitle>Edit Dokter</DialogTitle>
                         </DialogHeader>
                         {editingDoctor && (
                           <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                               <label htmlFor="edit-name" className="text-right text-sm">
-                                Name
+                                Nama
                               </label>
                               <Input
                                 id="edit-name"
@@ -284,7 +284,7 @@ export default function Doctors() {
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
                               <label htmlFor="edit-spec" className="text-right text-sm">
-                                Specialization
+                                Spesialisasi
                               </label>
                               <Select
                                 value={editingDoctor.specialization}
@@ -322,7 +322,7 @@ export default function Doctors() {
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
                               <label htmlFor="edit-phone" className="text-right text-sm">
-                                Phone
+                                Nomor Telepon
                               </label>
                               <Input
                                 id="edit-phone"
@@ -352,9 +352,9 @@ export default function Doctors() {
                         )}
                         <DialogFooter>
                           <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
+                            <Button variant="outline">Batal</Button>
                           </DialogClose>
-                          <Button onClick={handleUpdateDoctor}>Save Changes</Button>
+                          <Button onClick={handleUpdateDoctor}>Simpan Perubahan</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
@@ -376,9 +376,9 @@ export default function Doctors() {
       ) : (
         <div className="bg-gray-50 border rounded-lg p-8 text-center">
           <User className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No Doctors Found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Dokter tidak ditemukan</h3>
           <p className="text-gray-500 mb-4">
-            There are no doctors matching your search criteria.
+          Tidak ada dokter yang sesuai dengan kriteria pencarian Anda.
           </p>
         </div>
       )}

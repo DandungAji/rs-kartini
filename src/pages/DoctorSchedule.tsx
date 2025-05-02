@@ -53,7 +53,7 @@ export default function DoctorSchedule() {
       <Navbar />
       
       <PageHeader 
-        title="Doctor Schedules" 
+        title="Jadwal Dokter" 
         subtitle="Find and book appointments with our medical professionals"
       />
       
@@ -62,7 +62,7 @@ export default function DoctorSchedule() {
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Input
-              placeholder="Search by doctor name or specialization..."
+              placeholder="Cari nama dokter"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
@@ -77,7 +77,7 @@ export default function DoctorSchedule() {
                 <SelectValue placeholder="Filter by department" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
+                <SelectItem value="all">Semua Spesialis</SelectItem>
                 {departments.map((dept: Department) => (
                   <SelectItem key={dept.id} value={dept.name}>
                     {dept.name}
@@ -89,7 +89,7 @@ export default function DoctorSchedule() {
         </div>
         
         {/* Schedules by Day of Week */}
-        <Tabs defaultValue="Monday" className="mb-12">
+        <Tabs defaultValue="Senin" className="mb-12">
           <TabsList className="w-full overflow-x-auto flex justify-start md:justify-center">
             {weekDays.map(day => (
               <TabsTrigger key={day} value={day} className="flex-1 md:flex-none">
@@ -100,7 +100,7 @@ export default function DoctorSchedule() {
           
           {weekDays.map(day => (
             <TabsContent key={day} value={day} className="mt-6">
-              <h3 className="text-xl font-semibold mb-6">Doctors Available on {day}</h3>
+              <h3 className="text-xl font-semibold mb-6">Dokter yang tersedia di hari {day}</h3>
               
               {Object.entries(doctorsBySpecialization).map(([specialization, docs]) => {
                 // Filter doctors who have a schedule on this day
@@ -160,7 +160,7 @@ export default function DoctorSchedule() {
               
               {Object.keys(doctorsBySpecialization).length === 0 && (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No doctors matching your criteria found for {day}.</p>
+                  <p className="text-gray-500">Tidak ada dokter yang sesuai dengan kriteria Anda yang ditemukan di hari {day}.</p>
                 </div>
               )}
             </TabsContent>
@@ -169,7 +169,7 @@ export default function DoctorSchedule() {
 
         {/* All Doctors */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Our Medical Team</h2>
+          <h2 className="text-2xl font-bold mb-6">Dokter Spesialis Kami</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDoctors.map(doctor => (
@@ -187,7 +187,7 @@ export default function DoctorSchedule() {
                   <p className="text-gray-600 mb-4 line-clamp-2">{doctor.bio}</p>
                   
                   <div className="mt-auto">
-                    <h4 className="font-medium mb-2">Available on:</h4>
+                    <h4 className="font-medium mb-2">Tersedia di:</h4>
                     <div className="flex flex-wrap gap-1">
                       {getDoctorSchedules(doctor.id).map(schedule => (
                         <span key={schedule.id} className="text-xs bg-secondary py-1 px-2 rounded">
@@ -203,7 +203,7 @@ export default function DoctorSchedule() {
           
           {filteredDoctors.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">No doctors matching your search criteria.</p>
+              <p className="text-gray-500">Tidak ada dokter yang sesuai dengan kriteria pencarian Anda.</p>
             </div>
           )}
         </div>

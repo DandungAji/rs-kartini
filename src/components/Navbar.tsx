@@ -8,10 +8,10 @@ import WhatsAppButton from './WhatsAppButton';
 
 const navItems = [
   { name: 'Home', path: '/' },
-  { name: 'Doctor Schedule', path: '/doctor-schedule' },
-  { name: 'Services', path: '/services' },
-  { name: 'Contact', path: '/contact' },
-  { name: 'About', path: '/about' },
+  { name: 'Jadwal Dokter', path: '/doctor-schedule' },
+  { name: 'Layanan', path: '/services' },
+  { name: 'Kontak', path: '/contact' },
+  { name: 'Tentang', path: '/about' },
   { name: 'Info', path: '/info' },
 ];
 
@@ -26,13 +26,8 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-primary mr-2">
-                  <path d="M8 19h8a4 4 0 0 0 0-8h-8a4 4 0 0 0 0 8Z"></path>
-                  <path d="M8 5v4"></path>
-                  <path d="M16 5v4"></path>
-                  <path d="M12 5v14"></path>
-                </svg>
-                <span className="font-bold text-xl text-primary">MedHub</span>
+              <img src="/images/logo.png" alt="" className="h-12 mr-2" />
+                {/* <span className="font-bold text-xl text-primary">RS Kartini</span> */}
               </Link>
             </div>
             <div className="hidden md:flex space-x-4">
@@ -98,7 +93,7 @@ export default function Navbar() {
       
       {/* WhatsApp floating button - only show on public pages */}
       {!pathname.startsWith('/admin') && (
-        <WhatsAppButton phoneNumber="+11234567890" />
+        <WhatsAppButton phoneNumber="+6287819881010" />
       )}
     </>
   );

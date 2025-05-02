@@ -128,7 +128,7 @@ export default function Posts() {
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">Semua Kategori</SelectItem>
               {postCategories.map((category) => (
                 <SelectItem key={category.id} value={category.name}>
                   {category.name}
@@ -139,7 +139,7 @@ export default function Posts() {
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search posts..."
+              placeholder="Cari Postingan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 w-full md:w-[200px]"
@@ -151,17 +151,17 @@ export default function Posts() {
       {!editingPost ? (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-lg">Create New Post</CardTitle>
+            <CardTitle className="text-lg">Buat Postingan Baru</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                  Title
+                  Judul
                 </label>
                 <Input
                   id="title"
-                  placeholder="Post title"
+                  placeholder="Judul Postingan"
                   value={newPost.title}
                   onChange={(e) => setNewPost({...newPost, title: e.target.value})}
                 />
@@ -170,14 +170,14 @@ export default function Posts() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
+                    Kategori
                   </label>
                   <Select
                     value={newPost.category}
                     onValueChange={(value) => setNewPost({...newPost, category: value})}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select Category" />
+                      <SelectValue placeholder="Pilih Kategori" />
                     </SelectTrigger>
                     <SelectContent>
                       {postCategories.map((category) => (
@@ -204,7 +204,7 @@ export default function Posts() {
               
               <div>
                 <label htmlFor="publishDate" className="block text-sm font-medium text-gray-700 mb-1">
-                  Publish Date
+                  Tanggal Publikasi
                 </label>
                 <Popover>
                   <PopoverTrigger asChild>
