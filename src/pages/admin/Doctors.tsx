@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,8 +12,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Doctor } from "@/lib/types";
-import { doctors as initialDoctors, departments } from "@/lib/mockData";
+import { supabase } from "@/lib/supabase";
 import { 
   Edit, 
   Plus, 
@@ -26,31 +24,87 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
+interface Doctor {
+  id: string;
+  name: string;
+  specialization_id?: string;
+  specialization?: { name: string };
+  email?: string;
+  phone?: string;
+  bio?: string;
+  photo_url?: string;
+}
+
+interface Specialization {
+  id: string;
+  name: string;
+}
+
 export default function Doctors() {
   const { toast } = useToast();
-  const [doctors, setDoctors] = useState<Doctor[]>(initialDoctors);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   
   const [newDoctor, setNewDoctor] = useState<Partial<Doctor>>({
     name: "",
-    specialization: "",
+    specialization_id: "",
     email: "",
     phone: "",
-    bio: ""
+    bio: "",
+    photo_url: ""
   });
   
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
-  
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+
+  // Fetch doctors and specializations on mount
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      const { data, error } = await supabase
+        .from('doctors')
+        .select('id, name, specialization_id, specializations(name), email, phone, bio, photo_url');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Gagal mengambil data dokter.",
+          variant: "destructive",
+        });
+      } else {
+        setDoctors(data);
+      }
+    };
+
+    const fetchSpecializations = async () => {
+      const { data, error } = await supabase
+        .from('specializations')
+        .select('id, name')
+        .order('name');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Gagal mengambil data spesialisasi.",
+          variant: "destructive",
+        });
+      } else {
+        setSpecializations(data);
+      }
+    };
+
+    fetchDoctors();
+    fetchSpecializations();
+  }, []);
+
   // Filter doctors based on search query and department
   const filteredDoctors = doctors.filter(doctor => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDepartment = selectedDepartment === "all" || doctor.specialization === selectedDepartment;
+    const matchesDepartment = selectedDepartment === "all" || doctor.specialization_id === selectedDepartment;
     return matchesSearch && matchesDepartment;
   });
-  
-  const handleAddDoctor = () => {
-    if (!newDoctor.name || !newDoctor.specialization) {
+
+  const handleAddDoctor = async () => {
+    if (!newDoctor.name || !newDoctor.specialization_id) {
       toast({
         title: "Missing Information",
         description: "Please provide at least a name and specialization.",
@@ -58,57 +112,131 @@ export default function Doctors() {
       });
       return;
     }
-    
-    const newId = `${doctors.length + 1}`;
-    
-    const doctorToAdd: Doctor = {
-      id: newId,
-      name: newDoctor.name || "",
-      specialization: newDoctor.specialization || "",
-      email: newDoctor.email,
-      phone: newDoctor.phone,
-      bio: newDoctor.bio,
-    };
-    
-    setDoctors([...doctors, doctorToAdd]);
-    
-    toast({
-      title: "Doctor Added",
-      description: "The new doctor has been added successfully.",
-    });
-    
-    // Reset form
-    setNewDoctor({
-      name: "",
-      specialization: "",
-      email: "",
-      phone: "",
-      bio: ""
-    });
+
+    let photoUrl = '';
+    if (photoFile) {
+      const fileName = `doctor-${Date.now()}.${photoFile.name.split('.').pop()}`;
+      const { error: uploadError } = await supabase.storage
+        .from('doctor-photos')
+        .upload(fileName, photoFile);
+      if (uploadError) {
+        toast({
+          title: "Error",
+          description: "Gagal mengupload foto dokter.",
+          variant: "destructive",
+        });
+        return;
+      }
+      photoUrl = `${supabaseUrl}/storage/v1/object/public/doctor-photos/${fileName}`;
+    }
+
+    const { data, error } = await supabase
+      .from('doctors')
+      .insert([{
+        name: newDoctor.name,
+        specialization_id: newDoctor.specialization_id,
+        email: newDoctor.email,
+        phone: newDoctor.phone,
+        bio: newDoctor.bio,
+        photo_url: photoUrl
+      }])
+      .select('id, name, specialization_id, specializations(name), email, phone, bio, photo_url')
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Gagal menambah dokter.",
+        variant: "destructive",
+      });
+    } else {
+      setDoctors([...doctors, data]);
+      toast({
+        title: "Doctor Added",
+        description: "Dokter berhasil ditambahkan.",
+      });
+      setNewDoctor({
+        name: "",
+        specialization_id: "",
+        email: "",
+        phone: "",
+        bio: "",
+        photo_url: ""
+      });
+      setPhotoFile(null);
+    }
   };
-  
-  const handleUpdateDoctor = () => {
+
+  const handleUpdateDoctor = async () => {
     if (!editingDoctor) return;
-    
-    setDoctors(doctors.map(doc => 
-      doc.id === editingDoctor.id ? editingDoctor : doc
-    ));
-    
-    toast({
-      title: "Doctor Updated",
-      description: "The doctor information has been updated successfully.",
-    });
-    
-    setEditingDoctor(null);
+
+    let photoUrl = editingDoctor.photo_url;
+    if (photoFile) {
+      const fileName = `doctor-${Date.now()}.${photoFile.name.split('.').pop()}`;
+      const { error: uploadError } = await supabase.storage
+        .from('doctor-photos')
+        .upload(fileName, photoFile, { upsert: true });
+      if (uploadError) {
+        toast({
+          title: "Error",
+          description: "Gagal mengupload foto dokter.",
+          variant: "destructive",
+        });
+        return;
+      }
+      photoUrl = `${supabaseUrl}/storage/v1/object/public/doctor-photos/${fileName}`;
+    }
+
+    const { data, error } = await supabase
+      .from('doctors')
+      .update({
+        name: editingDoctor.name,
+        specialization_id: editingDoctor.specialization_id,
+        email: editingDoctor.email,
+        phone: editingDoctor.phone,
+        bio: editingDoctor.bio,
+        photo_url: photoUrl
+      })
+      .eq('id', editingDoctor.id)
+      .select('id, name, specialization_id, specializations(name), email, phone, bio, photo_url')
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memperbarui dokter.",
+        variant: "destructive",
+      });
+    } else {
+      setDoctors(doctors.map(doc => doc.id === data.id ? data : doc));
+      toast({
+        title: "Doctor Updated",
+        description: "Dokter berhasil diperbarui.",
+      });
+      setEditingDoctor(null);
+      setPhotoFile(null);
+    }
   };
-  
-  const handleDeleteDoctor = (id: string) => {
-    setDoctors(doctors.filter(doctor => doctor.id !== id));
-    
-    toast({
-      title: "Doctor Deleted",
-      description: "The doctor has been removed from the system.",
-    });
+
+  const handleDeleteDoctor = async (id: string) => {
+    const { error } = await supabase
+      .from('doctors')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Gagal menghapus dokter.",
+        variant: "destructive",
+      });
+    } else {
+      setDoctors(doctors.filter(doctor => doctor.id !== id));
+      toast({
+        title: "Doctor Deleted",
+        description: "Dokter berhasil dihapus.",
+      });
+    }
   };
 
   return (
@@ -121,13 +249,13 @@ export default function Doctors() {
             onValueChange={setSelectedDepartment}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Department" />
+              <SelectValue placeholder="Spesialisasi" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua Spesialisasi</SelectItem>
-              {departments.map((dept) => (
-                <SelectItem key={dept.id} value={dept.name}>
-                  {dept.name}
+              {specializations.map((spec) => (
+                <SelectItem key={spec.id} value={spec.id}>
+                  {spec.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -135,7 +263,7 @@ export default function Doctors() {
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search doctors..."
+              placeholder="Cari dokter..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 w-full md:w-[200px]"
@@ -167,16 +295,16 @@ export default function Doctors() {
                 Spesialisasi
               </label>
               <Select
-                value={newDoctor.specialization}
-                onValueChange={(value) => setNewDoctor({...newDoctor, specialization: value})}
+                value={newDoctor.specialization_id}
+                onValueChange={(value) => setNewDoctor({...newDoctor, specialization_id: value})}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Specialization" />
+                  <SelectValue placeholder="Pilih Spesialisasi" />
                 </SelectTrigger>
                 <SelectContent>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.name}>
-                      {dept.name}
+                  {specializations.map((spec) => (
+                    <SelectItem key={spec.id} value={spec.id}>
+                      {spec.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -205,6 +333,18 @@ export default function Doctors() {
                 placeholder="(62) 123-4567"
                 value={newDoctor.phone}
                 onChange={(e) => setNewDoctor({...newDoctor, phone: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="photo" className="block text-sm font-medium text-gray-700 mb-1">
+                Foto
+              </label>
+              <Input
+                id="photo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
               />
             </div>
             
@@ -246,7 +386,7 @@ export default function Doctors() {
               {filteredDoctors.map((doctor) => (
                 <TableRow key={doctor.id}>
                   <TableCell className="font-medium">{doctor.name}</TableCell>
-                  <TableCell>{doctor.specialization}</TableCell>
+                  <TableCell>{doctor.specialization?.name || '-'}</TableCell>
                   <TableCell>
                     {doctor.email && <div>{doctor.email}</div>}
                     {doctor.phone && <div className="text-sm text-gray-500">{doctor.phone}</div>}
@@ -287,19 +427,19 @@ export default function Doctors() {
                                 Spesialisasi
                               </label>
                               <Select
-                                value={editingDoctor.specialization}
+                                value={editingDoctor.specialization_id}
                                 onValueChange={(value) => setEditingDoctor({
                                   ...editingDoctor,
-                                  specialization: value
+                                  specialization_id: value
                                 })}
                               >
                                 <SelectTrigger className="col-span-3">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {departments.map((dept) => (
-                                    <SelectItem key={dept.id} value={dept.name}>
-                                      {dept.name}
+                                  {specializations.map((spec) => (
+                                    <SelectItem key={spec.id} value={spec.id}>
+                                      {spec.name}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -332,6 +472,18 @@ export default function Doctors() {
                                   ...editingDoctor,
                                   phone: e.target.value
                                 })}
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <label htmlFor="edit-photo" className="text-right text-sm">
+                                Foto
+                              </label>
+                              <Input
+                                id="edit-photo"
+                                type="file"
+                                accept="image/*"
+                                className="col-span-3"
+                                onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
                               />
                             </div>
                             <div className="grid grid-cols-4 items-start gap-4">
@@ -378,7 +530,7 @@ export default function Doctors() {
           <User className="h-12 w-12 mx-auto text-gray-400 mb-3" />
           <h3 className="text-lg font-medium text-gray-900 mb-1">Dokter tidak ditemukan</h3>
           <p className="text-gray-500 mb-4">
-          Tidak ada dokter yang sesuai dengan kriteria pencarian Anda.
+            Tidak ada dokter yang sesuai dengan kriteria pencarian Anda.
           </p>
         </div>
       )}

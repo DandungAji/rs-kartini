@@ -1,27 +1,44 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pencil, Plus, Trash } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { PostCategory } from "@/lib/types";
+import { supabase } from "@/lib/supabase";
 
-// Sample data - in a real app this would come from API/database
-const initialCategories = [
-  { id: "1", name: "News", slug: "news" },
-  { id: "2", name: "Health Tips", slug: "health-tips" },
-  { id: "3", name: "Medical Research", slug: "medical-research" },
-  { id: "4", name: "Events", slug: "events" },
-];
+interface PostCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export function PostCategories() {
-  const [categories, setCategories] = useState<PostCategory[]>(initialCategories);
+  const [categories, setCategories] = useState<PostCategory[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentCategory, setCurrentCategory] = useState<PostCategory | null>(null);
   const { toast } = useToast();
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, slug')
+        .order('name');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Gagal mengambil data kategori.",
+          variant: "destructive",
+        });
+      } else {
+        setCategories(data);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,12 +55,25 @@ export function PostCategories() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setCategories(categories.filter((c) => c.id !== id));
-    toast({
-      title: "Category deleted",
-      description: "The category has been removed successfully.",
-    });
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Gagal menghapus kategori.",
+        variant: "destructive",
+      });
+    } else {
+      setCategories(categories.filter((c) => c.id !== id));
+      toast({
+        title: "Category deleted",
+        description: "Kategori berhasil dihapus.",
+      });
+    }
   };
 
   const generateSlug = (name: string) => {
@@ -56,8 +86,6 @@ export function PostCategories() {
   const handleNameChange = (name: string) => {
     if (!currentCategory) return;
     
-    // Auto-generate slug when name changes, but only if the user hasn't manually edited the slug
-    // or if it's a new category
     const shouldUpdateSlug = !currentCategory.id || 
       currentCategory.slug === generateSlug(currentCategory.name) ||
       currentCategory.slug === "";
@@ -69,49 +97,70 @@ export function PostCategories() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!currentCategory) return;
 
     if (currentCategory.id) {
       // Update existing
-      setCategories(
-        categories.map((c) =>
-          c.id === currentCategory.id ? { ...currentCategory } : c
-        )
-      );
-      toast({
-        title: "Category updated",
-        description: "The category has been updated successfully.",
-      });
+      const { data, error } = await supabase
+        .from('categories')
+        .update({ name: currentCategory.name, slug: currentCategory.slug })
+        .eq('id', currentCategory.id)
+        .select()
+        .single();
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Gagal memperbarui kategori.",
+          variant: "destructive",
+        });
+      } else {
+        setCategories(categories.map((c) => c.id === data.id ? data : c));
+        toast({
+          title: "Category updated",
+          description: "Kategori berhasil diperbarui.",
+        });
+        setIsDialogOpen(false);
+      }
     } else {
       // Add new
-      const newCategory = {
-        ...currentCategory,
-        id: Date.now().toString(),
-      };
-      setCategories([...categories, newCategory]);
-      toast({
-        title: "Category added",
-        description: "The new category has been added successfully.",
-      });
+      const { data, error } = await supabase
+        .from('categories')
+        .insert([{ name: currentCategory.name, slug: currentCategory.slug }])
+        .select()
+        .single();
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Gagal menambah kategori.",
+          variant: "destructive",
+        });
+      } else {
+        setCategories([...categories, data]);
+        toast({
+          title: "Category added",
+          description: "Kategori baru berhasil ditambahkan.",
+        });
+        setIsDialogOpen(false);
+      }
     }
-    
-    setIsDialogOpen(false);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Input
-          placeholder="Search categories..."
+          placeholder="Cari kategori..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
         <Button onClick={handleAdd}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Category
+          Tambah Kategori
         </Button>
       </div>
 
@@ -119,16 +168,16 @@ export function PostCategories() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
+              <TableHead>Nama</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[100px]">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredCategories.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="h-24 text-center">
-                  No categories found.
+                  Tidak ada kategori ditemukan.
                 </TableCell>
               </TableRow>
             ) : (
@@ -165,13 +214,13 @@ export function PostCategories() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {currentCategory?.id ? "Edit Category" : "Add Category"}
+              {currentCategory?.id ? "Edit Kategori" : "Tambah Kategori"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <label htmlFor="name">Name</label>
+                <label htmlFor="name">Nama</label>
                 <Input
                   id="name"
                   value={currentCategory?.name || ""}
@@ -192,15 +241,15 @@ export function PostCategories() {
                   required
                 />
                 <p className="text-sm text-muted-foreground">
-                  Used in URLs. Auto-generated from name if left empty.
+                  Digunakan dalam URL. Otomatis dibuat dari nama jika dikosongkan.
                 </p>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
-                Cancel
+                Batal
               </Button>
-              <Button type="submit">Save</Button>
+              <Button type="submit">Simpan</Button>
             </DialogFooter>
           </form>
         </DialogContent>

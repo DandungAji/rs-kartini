@@ -1,5 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/lib/supabase";
 
 type User = {
   id: string;
@@ -9,65 +9,101 @@ type User = {
 
 interface AuthContextType {
   user: User;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Mock admin users for demo purposes
-const MOCK_USERS = [
-  { id: "1", username: "admin", password: "admin123", role: "admin" as const },
-  { id: "2", username: "editor", password: "editor123", role: "editor" as const },
-];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved authentication
-    const savedUser = localStorage.getItem("medhub_user");
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error("Failed to parse saved user:", error);
-        localStorage.removeItem("medhub_user");
+    const fetchUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('id, full_name, role')
+          .eq('id', authUser.id)
+          .single();
+        
+        if (error || !profile) {
+          console.error("Failed to fetch profile:", error);
+          setUser(null);
+        } else {
+          setUser({
+            id: profile.id,
+            username: profile.full_name || authUser.email || 'Unknown',
+            role: profile.role as 'admin' | 'editor',
+          });
+        }
+      } else {
+        setUser(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    fetchUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        fetchUser();
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     
-    const foundUser = MOCK_USERS.find(
-      (u) => u.username === username && u.password === password
-    );
-    
-    if (foundUser) {
-      const { password, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem("medhub_user", JSON.stringify(userWithoutPassword));
-      return true;
+    if (error || !data.user) {
+      setLoading(false);
+      return false;
     }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, full_name, role')
+      .eq('id', data.user.id)
+      .single();
     
-    return false;
+    if (profileError || !profile) {
+      console.error("Failed to fetch profile:", profileError);
+      setLoading(false);
+      return false;
+    }
+
+    setUser({
+      id: profile.id,
+      username: profile.full_name || data.user.email || 'Unknown',
+      role: profile.role as 'admin' | 'editor',
+    });
+    setLoading(false);
+    return true;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    setLoading(true);
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("medhub_user");
+    setLoading(false);
   };
 
   const contextValue = {
     user,
     login,
     logout,
-    loading
+    loading,
   };
 
   return (

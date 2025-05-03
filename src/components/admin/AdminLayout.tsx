@@ -1,9 +1,9 @@
-
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Calendar, Database, File, List, LogOut, Menu, User, Users, X } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -14,9 +14,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  
-  const handleLogout = () => {
-    logout();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      navigate("/admin/login");
+    }
+  }, [user, navigate]);
+
+  const handleLogout = async () => {
+    await logout();
     navigate("/admin/login");
   };
 
@@ -74,13 +81,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       >
         <div className="p-6">
           <Link to="/" className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-primary mr-2">
-              <path d="M8 19h8a4 4 0 0 0 0-8h-8a4 4 0 0 0 0 8Z"></path>
-              <path d="M8 5v4"></path>
-              <path d="M16 5v4"></path>
-              <path d="M12 5v14"></path>
-            </svg>
-            <span className="font-bold text-xl text-primary">MedHub</span>
+            <img src="/images/logo.png" alt="RS Kartini" className="h-12 mr-2" />
           </Link>
         </div>
         
@@ -89,10 +90,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             Logged in as
           </div>
           <div className="font-medium">
-            {user?.username}
+            {user?.username || 'Loading...'}
           </div>
           <div className="text-sm text-gray-500">
-            {user?.role}
+            {user?.role || 'Loading...'}
           </div>
         </div>
 
@@ -135,7 +136,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm h-16 flex items-center justify-end px-6">
           <Link to="/" className="text-gray-600 hover:text-primary text-sm">
-            View Website
+            Lihat Website
           </Link>
         </header>
         

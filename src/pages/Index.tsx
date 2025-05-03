@@ -129,7 +129,7 @@ export default function Index() {
           
           <div className="text-center mt-12">
             <Button asChild size="lg">
-              <Link to="/services">View All Services</Link>
+              <Link to="/services">Lihat Semua Layanan</Link>
             </Button>
           </div>
         </div>
