@@ -4,6 +4,8 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/lib/supabase";
 import { Calendar, File, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
+import id from "date-fns/locale/id";
 
 interface Doctor {
   id: string;
@@ -15,8 +17,9 @@ interface Doctor {
 interface Post {
   id: string;
   title: string;
-  author?: { email: string };
+  author?: { full_name: string };
   status: 'draft' | 'published';
+  publish_date?: string;
 }
 
 interface Stats {
@@ -51,8 +54,10 @@ export default function Dashboard() {
 
       if (doctorsCount.error || schedulesCount.error || publishedPostsCount.error || draftPostsCount.error) {
         toast({
-          title: "Error",
-          description: "Gagal mengambil statistik.",
+          title: "Kesalahan",
+          description: "Gagal mengambil statistik: " + 
+            (doctorsCount.error?.message || schedulesCount.error?.message || 
+             publishedPostsCount.error?.message || draftPostsCount.error?.message),
           variant: "destructive",
         });
       }
@@ -67,8 +72,8 @@ export default function Dashboard() {
       
       if (error) {
         toast({
-          title: "Error",
-          description: "Gagal mengambil data dokter.",
+          title: "Kesalahan",
+          description: "Gagal mengambil data dokter: " + error.message,
           variant: "destructive",
         });
       } else {
@@ -79,14 +84,17 @@ export default function Dashboard() {
     const fetchPosts = async () => {
       const { data, error } = await supabase
         .from('posts')
-        .select('id, title, author:auth.users(email), status')
+        .select(`
+          id, title, status, publish_date,
+          author:profiles(full_name)
+        `)
         .order('created_at', { ascending: false })
         .limit(5);
       
       if (error) {
         toast({
-          title: "Error",
-          description: "Gagal mengambil data postingan.",
+          title: "Kesalahan",
+          description: "Gagal mengambil data postingan: " + error.message,
           variant: "destructive",
         });
       } else {
@@ -97,7 +105,17 @@ export default function Dashboard() {
     fetchStats();
     fetchDoctors();
     fetchPosts();
-  }, []);
+  }, [toast]);
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Belum Dipublikasikan";
+    try {
+      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('id-ID', options);
+    } catch {
+      return "Tanggal Tidak Valid";
+    }
+  };
 
   return (
     <AdminLayout>
@@ -193,10 +211,13 @@ export default function Dashboard() {
                   <div className="flex-grow">
                     <p className="font-medium">{post.title}</p>
                     <div className="flex justify-between text-sm text-gray-500">
-                      <span>{post.author?.email || 'Unknown'}</span>
-                      <span className="bg-gray-100 px-2 py-0.5 rounded">
-                        {post.status === 'published' ? 'Dipublikasikan' : 'Draft'}
-                      </span>
+                      <span>{post.author?.full_name || 'Anonim'}</span>
+                      <div className="flex items-center gap-2">
+                        <span>{formatDate(post.publish_date)}</span>
+                        <span className="bg-gray-100 px-2 py-0.5 rounded">
+                          {post.status === 'published' ? 'Dipublikasikan' : 'Draft'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

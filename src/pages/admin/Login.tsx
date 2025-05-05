@@ -6,12 +6,12 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "",
     password: "",
   });
 
@@ -28,22 +28,13 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      const success = await login(formData.email, formData.password);
-      
-      if (success) {
-        navigate("/admin");
-      } else {
-        toast({
-          title: "Autentikasi Gagal",
-          description: "Email atau kata sandi salah.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+      await signIn(formData.identifier, formData.password);
+      navigate("/admin");
+    } catch (error: any) {
       console.error("Login error:", error);
       toast({
-        title: "Kesalahan Autentikasi",
-        description: "Terjadi kesalahan saat login. Silakan coba lagi.",
+        title: "Autentikasi Gagal",
+        description: error.message || "Terjadi kesalahan saat login. Silakan coba lagi.",
         variant: "destructive",
       });
     } finally {
@@ -64,18 +55,18 @@ export default function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
+              <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
+                Username atau Email
               </label>
               <Input
-                id="email"
-                name="email"
-                type="email"
+                id="identifier"
+                name="identifier"
+                type="text"
                 required
-                value={formData.email}
+                value={formData.identifier}
                 onChange={handleChange}
                 className="mt-1"
-                placeholder="Email"
+                placeholder="Username atau Email"
               />
             </div>
             <div>

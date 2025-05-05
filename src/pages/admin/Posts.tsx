@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Calendar as CalendarIcon, Edit, Plus, Search, Trash } from "lucide-react";
 import { format } from "date-fns";
+import id from "date-fns/locale/id";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -20,8 +21,8 @@ interface Post {
   title: string;
   content: string;
   category: { id: string; name: string };
-  author: { id: string; email: string; full_name?: string };
-  publish_date: string;
+  author?: { id: string; full_name?: string; email?: string };
+  publish_date?: string;
   status: 'draft' | 'published';
   summary?: string;
   image_url?: string;
@@ -32,11 +33,18 @@ interface Category {
   name: string;
 }
 
+interface Profile {
+  id: string;
+  full_name: string;
+  email?: string;
+}
+
 export default function Posts() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<"all" | "published" | "draft">("all");
@@ -47,12 +55,15 @@ export default function Posts() {
     title: "",
     content: "",
     category: { id: "", name: "" },
-    author: { id: user?.id || "", email: user?.username || "", full_name: user?.username },
+    author: user ? { id: user.id, email: user.email, full_name: user.user_metadata?.full_name } : undefined,
     status: "draft",
+    publish_date: new Date().toISOString().split('T')[0],
   });
 
-  // Fetch posts and categories on mount
+  // Fetch posts, categories, and profiles on mount
   useEffect(() => {
+    if (!user) return;
+
     const fetchCategories = async () => {
       const { data, error } = await supabase
         .from('categories')
@@ -61,14 +72,34 @@ export default function Posts() {
       if (error) {
         toast({
           title: "Kesalahan",
-          description: "Gagal mengambil data kategori.",
+          description: "Gagal mengambil data kategori: " + error.message,
           variant: "destructive",
         });
+        console.error("Fetch categories error:", error);
       } else {
         setCategories(data);
         if (data.length > 0) {
           setNewPost((prev) => ({ ...prev, category: { id: data[0].id, name: data[0].name } }));
         }
+        console.log("Categories fetched:", data);
+      }
+    };
+
+    const fetchProfiles = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .order('full_name');
+      if (error) {
+        toast({
+          title: "Kesalahan",
+          description: "Gagal mengambil data pengguna: " + error.message,
+          variant: "destructive",
+        });
+        console.error("Fetch profiles error:", error);
+      } else {
+        setProfiles(data);
+        console.log("Profiles fetched:", data);
       }
     };
 
@@ -78,63 +109,72 @@ export default function Posts() {
         .select(`
           id, title, content, status, publish_date, summary, image_url,
           category:categories(id, name),
-          author:auth.users(id, email, profiles(full_name))
+          author:profiles(id, full_name)
         `)
-        .order('publish_date', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (error) {
         toast({
           title: "Kesalahan",
-          description: "Gagal mengambil data postingan.",
+          description: `Gagal mengambil data postingan: ${error.message}. Detail: ${error.details || 'Tidak ada detail'}`,
           variant: "destructive",
         });
-      } else {
-        setPosts(data.map(post => ({
-          ...post,
-          author: {
-            id: post.author.id,
-            email: post.author.email,
-            full_name: post.author.profiles?.full_name,
-          },
-        })));
+        console.error("Fetch posts error:", error);
+        return;
       }
+
+      setPosts(data.map(post => ({
+        ...post,
+        author: post.author ? {
+          id: post.author.id,
+          full_name: post.author.full_name || undefined,
+          email: user.email || undefined,
+        } : undefined,
+      })));
+      console.log("Posts fetched:", data);
     };
 
     fetchCategories();
+    fetchProfiles();
     fetchPosts();
-  }, []);
+  }, [user, toast]);
 
   // Filter posts
-  const filteredPosts = posts
-    .filter(post => {
-      const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           (post.author.full_name || post.author.email).toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === "all" || post.category.id === selectedCategory;
-      const matchesStatus = activeTab === "all" ||
-                           (activeTab === "published" && post.status === "published") ||
-                           (activeTab === "draft" && post.status === "draft");
-      
-      return matchesSearch && matchesCategory && matchesStatus;
-    });
+  const filteredPosts = posts.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (post.author?.full_name || post.author?.email || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || post.category.id === selectedCategory;
+    const matchesStatus = activeTab === "all" ||
+                         (activeTab === "published" && post.status === "published") ||
+                         (activeTab === "draft" && post.status === "draft");
+    
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Belum Dipublikasikan";
+    try {
+      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('id-ID', options);
+    } catch {
+      return "Tanggal Tidak Valid";
+    }
   };
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const { data, error } = await supabase.storage
+    const fileName = `post-${Date.now()}.${fileExt}`;
+    const { error } = await supabase.storage
       .from('post-images')
       .upload(fileName, file);
     
     if (error) {
       toast({
         title: "Kesalahan",
-        description: "Gagal mengunggah gambar.",
+        description: "Gagal mengunggah gambar: " + error.message,
         variant: "destructive",
       });
+      console.error("Upload error:", error);
       return null;
     }
 
@@ -146,10 +186,10 @@ export default function Posts() {
   };
 
   const handleAddPost = async () => {
-    if (!newPost.title || !newPost.content || !newPost.category?.id || !user) {
+    if (!newPost.title || !newPost.content || !newPost.category?.id) {
       toast({
         title: "Informasi Kurang",
-        description: "Harap isi semua kolom yang diperlukan.",
+        description: "Harap isi judul, konten, dan kategori.",
         variant: "destructive",
       });
       return;
@@ -165,11 +205,11 @@ export default function Posts() {
       title: newPost.title,
       content: newPost.content,
       category_id: newPost.category.id,
-      author_id: user.id,
+      author_id: newPost.author?.id || null,
       status: newPost.status || 'draft',
-      publish_date: newPost.publish_date || new Date().toISOString().split('T')[0],
-      summary: newPost.summary,
-      image_url: imageUrl,
+      publish_date: newPost.publish_date || null,
+      summary: newPost.summary || null,
+      image_url: imageUrl || null,
     };
 
     const { data, error } = await supabase
@@ -178,42 +218,54 @@ export default function Posts() {
       .select(`
         id, title, content, status, publish_date, summary, image_url,
         category:categories(id, name),
-        author:auth.users(id, email, profiles(full_name))
+        author:profiles(id, full_name)
       `)
       .single();
 
     if (error) {
       toast({
         title: "Kesalahan",
-        description: "Gagal menambah postingan.",
+        description: "Gagal menambah postingan: " + error.message,
         variant: "destructive",
       });
-    } else {
-      setPosts([{ 
-        ...data, 
-        author: {
-          id: data.author.id,
-          email: data.author.email,
-          full_name: data.author.profiles?.full_name,
-        }
-      }, ...posts]);
-      toast({
-        title: "Postingan Ditambahkan",
-        description: `Postingan telah ditambahkan sebagai ${data.status === 'published' ? 'Dipublikasikan' : 'Draft'}.`,
-      });
-      setNewPost({
-        title: "",
-        content: "",
-        category: categories[0] ? { id: categories[0].id, name: categories[0].name } : { id: "", name: "" },
-        author: { id: user.id, email: user.username, full_name: user.username },
-        status: "draft",
-      });
-      setImageFile(null);
+      console.error("Insert error:", error);
+      return;
     }
+
+    if (!data) {
+      toast({
+        title: "Kesalahan",
+        description: "Tidak ada data yang dikembalikan setelah menambah postingan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPosts([{ 
+      ...data, 
+      author: data.author ? {
+        id: data.author.id,
+        full_name: data.author.full_name || undefined,
+        email: profiles.find(p => p.id === data.author?.id)?.email || undefined,
+      } : undefined
+    }, ...posts]);
+    toast({
+      title: "Postingan Ditambahkan",
+      description: `Postingan telah ditambahkan sebagai ${data.status === 'published' ? 'Dipublikasikan' : 'Draft'}.`,
+    });
+    setNewPost({
+      title: "",
+      content: "",
+      category: categories[0] ? { id: categories[0].id, name: categories[0].name } : { id: "", name: "" },
+      author: user ? { id: user.id, email: user.email, full_name: user.user_metadata?.full_name } : undefined,
+      status: "draft",
+      publish_date: new Date().toISOString().split('T')[0],
+    });
+    setImageFile(null);
   };
 
   const handleUpdatePost = async () => {
-    if (!editingPost || !user) return;
+    if (!editingPost) return;
 
     let imageUrl = editingPost.image_url;
     if (imageFile) {
@@ -227,42 +279,53 @@ export default function Posts() {
         title: editingPost.title,
         content: editingPost.content,
         category_id: editingPost.category.id,
-        author_id: user.id,
+        author_id: editingPost.author?.id || null,
         status: editingPost.status,
-        publish_date: editingPost.publish_date,
-        summary: editingPost.summary,
-        image_url: imageUrl,
+        publish_date: editingPost.publish_date || null,
+        summary: editingPost.summary || null,
+        image_url: imageUrl || null,
       })
       .eq('id', editingPost.id)
       .select(`
         id, title, content, status, publish_date, summary, image_url,
         category:categories(id, name),
-        author:auth.users(id, email, profiles(full_name))
+        author:profiles(id, full_name)
       `)
       .single();
 
     if (error) {
       toast({
         title: "Kesalahan",
-        description: "Gagal memperbarui postingan.",
+        description: "Gagal memperbarui postingan: " + error.message,
         variant: "destructive",
       });
-    } else {
-      setPosts(posts.map(post => post.id === data.id ? { 
-        ...data, 
-        author: {
-          id: data.author.id,
-          email: data.author.email,
-          full_name: data.author.profiles?.full_name,
-        }
-      } : post));
-      toast({
-        title: "Postingan Diperbarui",
-        description: "Postingan telah diperbarui.",
-      });
-      setEditingPost(null);
-      setImageFile(null);
+      console.error("Update error:", error);
+      return;
     }
+
+    if (!data) {
+      toast({
+        title: "Kesalahan",
+        description: "Tidak ada data yang dikembalikan setelah memperbarui postingan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPosts(posts.map(post => post.id === data.id ? { 
+      ...data, 
+      author: data.author ? {
+        id: data.author.id,
+        full_name: data.author.full_name || undefined,
+        email: profiles.find(p => p.id === data.author?.id)?.email || undefined,
+      } : undefined
+    } : post));
+    toast({
+      title: "Postingan Diperbarui",
+      description: "Postingan telah diperbarui.",
+    });
+    setEditingPost(null);
+    setImageFile(null);
   };
 
   const handleDeletePost = async (id: string) => {
@@ -274,17 +337,22 @@ export default function Posts() {
     if (error) {
       toast({
         title: "Kesalahan",
-        description: "Gagal menghapus postingan.",
+        description: "Gagal menghapus postingan: " + error.message,
         variant: "destructive",
       });
-    } else {
-      setPosts(posts.filter(post => post.id !== id));
-      toast({
-        title: "Postingan Dihapus",
-        description: "Postingan telah dihapus.",
-      });
+      console.error("Delete error:", error);
+      return;
     }
+
+    setPosts(posts.filter(post => post.id !== id));
+    toast({
+      title: "Postingan Dihapus",
+      description: "Postingan telah dihapus.",
+    });
   };
+
+  if (loading) return <div className="p-4">Memuat...</div>;
+  if (!user) return <div className="p-4">Harap login untuk mengakses halaman ini.</div>;
 
   return (
     <AdminLayout>
@@ -349,9 +417,10 @@ export default function Posts() {
                       const selected = categories.find(c => c.id === value);
                       setNewPost({...newPost, category: selected ? { id: selected.id, name: selected.name } : { id: "", name: "" }});
                     }}
+                    disabled={categories.length === 0}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih Kategori" />
+                      <SelectValue placeholder={categories.length === 0 ? "Tidak ada kategori" : "Pilih Kategori"} />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((category) => (
@@ -367,11 +436,28 @@ export default function Posts() {
                   <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
                     Penulis
                   </label>
-                  <Input
-                    id="author"
-                    value={user?.username || ""}
-                    disabled
-                  />
+                  <Select
+                    value={newPost.author?.id}
+                    onValueChange={(value) => {
+                      const selected = profiles.find(p => p.id === value);
+                      setNewPost({
+                        ...newPost,
+                        author: selected ? { id: selected.id, full_name: selected.full_name, email: selected.email } : undefined
+                      });
+                    }}
+                    disabled={profiles.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={profiles.length === 0 ? "Tidak ada penulis" : "Pilih Penulis"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profiles.map((profile) => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                          {profile.full_name || "Anonim"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               
@@ -391,7 +477,7 @@ export default function Posts() {
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {newPost.publish_date ? (
-                        format(new Date(newPost.publish_date), "PPP")
+                        format(new Date(newPost.publish_date), "PPP", { locale: id })
                       ) : (
                         <span>Pilih tanggal</span>
                       )}
@@ -454,15 +540,24 @@ export default function Posts() {
                 <div className="flex gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Status</label>
-                    <select 
-                      className="w-full p-2 border rounded"
+                    <Select
                       value={newPost.status}
-                      onChange={(e) => setNewPost({...newPost, status: e.target.value as "draft" | "published"})}
-                      required
+                      onValueChange={(value) => setNewPost({
+                        ...newPost, 
+                        status: value as "draft" | "published",
+                        publish_date: value === "published" && !newPost.publish_date 
+                          ? new Date().toISOString().split('T')[0] 
+                          : newPost.publish_date
+                      })}
                     >
-                      <option value="draft">Draft</option>
-                      <option value="published">Dipublikasikan</option>
-                    </select>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="published">Dipublikasikan</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 
@@ -509,6 +604,7 @@ export default function Posts() {
                       const selected = categories.find(c => c.id === value);
                       setEditingPost({...editingPost, category: selected ? { id: selected.id, name: selected.name } : editingPost.category});
                     }}
+                    disabled={categories.length === 0}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -527,11 +623,28 @@ export default function Posts() {
                   <label htmlFor="editAuthor" className="block text-sm font-medium text-gray-700 mb-1">
                     Penulis
                   </label>
-                  <Input
-                    id="editAuthor"
-                    value={user?.username || ""}
-                    disabled
-                  />
+                  <Select
+                    value={editingPost.author?.id}
+                    onValueChange={(value) => {
+                      const selected = profiles.find(p => p.id === value);
+                      setEditingPost({
+                        ...editingPost,
+                        author: selected ? { id: selected.id, full_name: selected.full_name, email: selected.email } : undefined
+                      });
+                    }}
+                    disabled={profiles.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={profiles.length === 0 ? "Tidak ada penulis" : "Pilih Penulis"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profiles.map((profile) => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                          {profile.full_name || "Anonim"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               
@@ -544,20 +657,27 @@ export default function Posts() {
                     <Button
                       id="editPublishDate"
                       variant={"outline"}
-                      className="w-full justify-start text-left font-normal"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !editingPost.publish_date && "text-muted-foreground"
+                      )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(new Date(editingPost.publish_date), "PPP")}
+                      {editingPost.publish_date ? (
+                        format(new Date(editingPost.publish_date), "PPP", { locale: id })
+                      ) : (
+                        <span>Pilih tanggal</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={new Date(editingPost.publish_date)}
+                      selected={editingPost.publish_date ? new Date(editingPost.publish_date) : undefined}
                       onSelect={(date) => 
                         setEditingPost({
                           ...editingPost, 
-                          publish_date: date ? date.toISOString().split('T')[0] : editingPost.publish_date
+                          publish_date: date ? date.toISOString().split('T')[0] : undefined
                         })
                       }
                       initialFocus
@@ -607,14 +727,24 @@ export default function Posts() {
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-1 block">Status</label>
-                  <select 
-                    className="w-full p-2 border rounded"
+                  <Select
                     value={editingPost.status}
-                    onChange={(e) => setEditingPost({...editingPost, status: e.target.value as "draft" | "published"})}
+                    onValueChange={(value) => setEditingPost({
+                      ...editingPost, 
+                      status: value as "draft" | "published",
+                      publish_date: value === "published" && !editingPost.publish_date 
+                        ? new Date().toISOString().split('T')[0] 
+                        : editingPost.publish_date
+                    })}
                   >
-                    <option value="draft">Draft</option>
-                    <option value="published">Dipublikasikan</option>
-                  </select>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="published">Dipublikasikan</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <Button onClick={handleUpdatePost}>
@@ -707,7 +837,7 @@ export default function Posts() {
             </div>
             <p className="text-sm text-gray-600 line-clamp-2 mb-2">{post.summary || post.content.substring(0, 100) + '...'}</p>
             <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>Oleh {post.author.full_name || post.author.email}</span>
+              <span>Oleh {post.author?.full_name || post.author?.email || "Anonim"}</span>
               <span>{formatDate(post.publish_date)}</span>
             </div>
           </CardContent>

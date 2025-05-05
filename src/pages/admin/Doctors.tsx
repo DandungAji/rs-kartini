@@ -23,14 +23,14 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Doctor {
   id: string;
   name: string;
   specialization_id?: string;
   specialization?: { name: string };
-  email?: string;
-  phone?: string;
+  contact?: string;
   bio?: string;
   photo_url?: string;
 }
@@ -41,6 +41,7 @@ interface Specialization {
 }
 
 export default function Doctors() {
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
@@ -50,8 +51,7 @@ export default function Doctors() {
   const [newDoctor, setNewDoctor] = useState<Partial<Doctor>>({
     name: "",
     specialization_id: "",
-    email: "",
-    phone: "",
+    contact: "",
     bio: "",
     photo_url: ""
   });
@@ -61,18 +61,33 @@ export default function Doctors() {
 
   // Fetch doctors and specializations on mount
   useEffect(() => {
+    if (!user) return;
+
     const fetchDoctors = async () => {
       const { data, error } = await supabase
         .from('doctors')
-        .select('id, name, specialization_id, specializations(name), email, phone, bio, photo_url');
+        .select(`
+          id, 
+          name, 
+          specialization_id, 
+          specialization:specializations!specialization_id(name), 
+          contact, 
+          bio, 
+          photo_url
+        `);
       if (error) {
         toast({
-          title: "Error",
-          description: "Gagal mengambil data dokter.",
+          title: "Kesalahan",
+          description: "Gagal mengambil data dokter: " + error.message,
           variant: "destructive",
         });
+        console.error("Fetch doctors error:", error);
       } else {
-        setDoctors(data);
+        setDoctors(data.map(doc => ({
+          ...doc,
+          specialization: doc.specialization || { name: '-' }
+        })));
+        console.log("Doctors fetched:", data);
       }
     };
 
@@ -83,18 +98,23 @@ export default function Doctors() {
         .order('name');
       if (error) {
         toast({
-          title: "Error",
-          description: "Gagal mengambil data spesialisasi.",
+          title: "Kesalahan",
+          description: "Gagal mengambil data spesialisasi: " + error.message,
           variant: "destructive",
         });
+        console.error("Fetch specializations error:", error);
       } else {
         setSpecializations(data);
+        if (data.length > 0) {
+          setNewDoctor(prev => ({ ...prev, specialization_id: data[0].id }));
+        }
+        console.log("Specializations fetched:", data);
       }
     };
 
     fetchDoctors();
     fetchSpecializations();
-  }, []);
+  }, [user]);
 
   // Filter doctors based on search query and department
   const filteredDoctors = doctors.filter(doctor => {
@@ -106,28 +126,43 @@ export default function Doctors() {
   const handleAddDoctor = async () => {
     if (!newDoctor.name || !newDoctor.specialization_id) {
       toast({
-        title: "Missing Information",
-        description: "Please provide at least a name and specialization.",
+        title: "Informasi Kurang",
+        description: "Harap masukkan nama dan spesialisasi.",
         variant: "destructive",
       });
       return;
     }
 
-    let photoUrl = '';
+    // Validasi nomor kontak
+    if (newDoctor.contact && !/^\+?\d{10,15}$/.test(newDoctor.contact.replace(/\s/g, ''))) {
+      toast({
+        title: "Nomor Kontak Tidak Valid",
+        description: "Harap masukkan nomor kontak yang valid (10-15 digit).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let photoUrl = newDoctor.photo_url;
     if (photoFile) {
-      const fileName = `doctor-${Date.now()}.${photoFile.name.split('.').pop()}`;
+      const fileExt = photoFile.name.split('.').pop();
+      const fileName = `doctor-${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
         .from('doctor-photos')
         .upload(fileName, photoFile);
       if (uploadError) {
         toast({
-          title: "Error",
-          description: "Gagal mengupload foto dokter.",
+          title: "Kesalahan",
+          description: "Gagal mengunggah foto dokter: " + uploadError.message,
           variant: "destructive",
         });
+        console.error("Upload error:", uploadError);
         return;
       }
-      photoUrl = `${supabaseUrl}/storage/v1/object/public/doctor-photos/${fileName}`;
+      const { data: publicUrlData } = supabase.storage
+        .from('doctor-photos')
+        .getPublicUrl(fileName);
+      photoUrl = publicUrlData.publicUrl;
     }
 
     const { data, error } = await supabase
@@ -135,31 +170,38 @@ export default function Doctors() {
       .insert([{
         name: newDoctor.name,
         specialization_id: newDoctor.specialization_id,
-        email: newDoctor.email,
-        phone: newDoctor.phone,
-        bio: newDoctor.bio,
-        photo_url: photoUrl
+        contact: newDoctor.contact || null,
+        bio: newDoctor.bio || null,
+        photo_url: photoUrl || null
       }])
-      .select('id, name, specialization_id, specializations(name), email, phone, bio, photo_url')
+      .select(`
+        id, 
+        name, 
+        specialization_id, 
+        specialization:specializations!specialization_id(name), 
+        contact, 
+        bio, 
+        photo_url
+      `)
       .single();
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal menambah dokter.",
+        title: "Kesalahan",
+        description: "Gagal menambah dokter: " + error.message,
         variant: "destructive",
       });
+      console.error("Insert error:", error);
     } else {
-      setDoctors([...doctors, data]);
+      setDoctors([...doctors, { ...data, specialization: data.specialization || { name: '-' } }]);
       toast({
-        title: "Doctor Added",
+        title: "Dokter Ditambahkan",
         description: "Dokter berhasil ditambahkan.",
       });
       setNewDoctor({
         name: "",
-        specialization_id: "",
-        email: "",
-        phone: "",
+        specialization_id: specializations[0]?.id || "",
+        contact: "",
         bio: "",
         photo_url: ""
       });
@@ -170,21 +212,36 @@ export default function Doctors() {
   const handleUpdateDoctor = async () => {
     if (!editingDoctor) return;
 
+    // Validasi nomor kontak
+    if (editingDoctor.contact && !/^\+?\d{10,15}$/.test(editingDoctor.contact.replace(/\s/g, ''))) {
+      toast({
+        title: "Nomor Kontak Tidak Valid",
+        description: "Harap masukkan nomor kontak yang valid (10-15 digit).",
+        variant: "destructive",
+      });
+      return;
+    }
+
     let photoUrl = editingDoctor.photo_url;
     if (photoFile) {
-      const fileName = `doctor-${Date.now()}.${photoFile.name.split('.').pop()}`;
+      const fileExt = photoFile.name.split('.').pop();
+      const fileName = `doctor-${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
         .from('doctor-photos')
         .upload(fileName, photoFile, { upsert: true });
       if (uploadError) {
         toast({
-          title: "Error",
-          description: "Gagal mengupload foto dokter.",
+          title: "Kesalahan",
+          description: "Gagal mengunggah foto dokter: " + uploadError.message,
           variant: "destructive",
         });
+        console.error("Upload error:", uploadError);
         return;
       }
-      photoUrl = `${supabaseUrl}/storage/v1/object/public/doctor-photos/${fileName}`;
+      const { data: publicUrlData } = supabase.storage
+        .from('doctor-photos')
+        .getPublicUrl(fileName);
+      photoUrl = publicUrlData.publicUrl;
     }
 
     const { data, error } = await supabase
@@ -192,25 +249,33 @@ export default function Doctors() {
       .update({
         name: editingDoctor.name,
         specialization_id: editingDoctor.specialization_id,
-        email: editingDoctor.email,
-        phone: editingDoctor.phone,
-        bio: editingDoctor.bio,
-        photo_url: photoUrl
+        contact: editingDoctor.contact || null,
+        bio: editingDoctor.bio || null,
+        photo_url: photoUrl || null
       })
       .eq('id', editingDoctor.id)
-      .select('id, name, specialization_id, specializations(name), email, phone, bio, photo_url')
+      .select(`
+        id, 
+        name, 
+        specialization_id, 
+        specialization:specializations!specialization_id(name), 
+        contact, 
+        bio, 
+        photo_url
+      `)
       .single();
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal memperbarui dokter.",
+        title: "Kesalahan",
+        description: "Gagal memperbarui dokter: " + error.message,
         variant: "destructive",
       });
+      console.error("Update error:", error);
     } else {
-      setDoctors(doctors.map(doc => doc.id === data.id ? data : doc));
+      setDoctors(doctors.map(doc => doc.id === data.id ? { ...data, specialization: data.specialization || { name: '-' } } : doc));
       toast({
-        title: "Doctor Updated",
+        title: "Dokter Diperbarui",
         description: "Dokter berhasil diperbarui.",
       });
       setEditingDoctor(null);
@@ -226,18 +291,22 @@ export default function Doctors() {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal menghapus dokter.",
+        title: "Kesalahan",
+        description: "Gagal menghapus dokter: " + error.message,
         variant: "destructive",
       });
+      console.error("Delete error:", error);
     } else {
       setDoctors(doctors.filter(doctor => doctor.id !== id));
       toast({
-        title: "Doctor Deleted",
+        title: "Dokter Dihapus",
         description: "Dokter berhasil dihapus.",
       });
     }
   };
+
+  if (loading) return <div className="p-4">Memuat...</div>;
+  if (!user) return <div className="p-4">Harap login untuk mengakses halaman ini.</div>;
 
   return (
     <AdminLayout>
@@ -287,6 +356,7 @@ export default function Doctors() {
                 placeholder="Dr. Jane Smith"
                 value={newDoctor.name}
                 onChange={(e) => setNewDoctor({...newDoctor, name: e.target.value})}
+                required
               />
             </div>
             
@@ -297,9 +367,10 @@ export default function Doctors() {
               <Select
                 value={newDoctor.specialization_id}
                 onValueChange={(value) => setNewDoctor({...newDoctor, specialization_id: value})}
+                disabled={specializations.length === 0}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih Spesialisasi" />
+                  <SelectValue placeholder={specializations.length === 0 ? "Tidak ada spesialisasi" : "Pilih Spesialisasi"} />
                 </SelectTrigger>
                 <SelectContent>
                   {specializations.map((spec) => (
@@ -312,27 +383,14 @@ export default function Doctors() {
             </div>
             
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+              <label htmlFor="contact" className="block text-sm font-medium text-gray-700 mb-1">
+                Nomor Kontak
               </label>
               <Input
-                id="email"
-                type="email"
-                placeholder="dokter@rskartini.id"
-                value={newDoctor.email}
-                onChange={(e) => setNewDoctor({...newDoctor, email: e.target.value})}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Nomor Telepon
-              </label>
-              <Input
-                id="phone"
-                placeholder="(62) 123-4567"
-                value={newDoctor.phone}
-                onChange={(e) => setNewDoctor({...newDoctor, phone: e.target.value})}
+                id="contact"
+                placeholder="+62 123-4567"
+                value={newDoctor.contact}
+                onChange={(e) => setNewDoctor({...newDoctor, contact: e.target.value})}
               />
             </div>
             
@@ -362,7 +420,7 @@ export default function Doctors() {
             </div>
           </div>
           
-          <Button onClick={handleAddDoctor} className="mt-4">
+          <Button onClick={handleAddDoctor} className="mt-4" disabled={specializations.length === 0}>
             <Plus className="h-4 w-4 mr-2" />
             Tambah Dokter
           </Button>
@@ -388,8 +446,7 @@ export default function Doctors() {
                   <TableCell className="font-medium">{doctor.name}</TableCell>
                   <TableCell>{doctor.specialization?.name || '-'}</TableCell>
                   <TableCell>
-                    {doctor.email && <div>{doctor.email}</div>}
-                    {doctor.phone && <div className="text-sm text-gray-500">{doctor.phone}</div>}
+                    {doctor.contact && <div className="text-sm text-gray-500">{doctor.contact}</div>}
                   </TableCell>
                   <TableCell className="text-right">
                     <Dialog>
@@ -420,6 +477,7 @@ export default function Doctors() {
                                   ...editingDoctor,
                                   name: e.target.value
                                 })}
+                                required
                               />
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
@@ -432,6 +490,7 @@ export default function Doctors() {
                                   ...editingDoctor,
                                   specialization_id: value
                                 })}
+                                disabled={specializations.length === 0}
                               >
                                 <SelectTrigger className="col-span-3">
                                   <SelectValue />
@@ -446,31 +505,16 @@ export default function Doctors() {
                               </Select>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="edit-email" className="text-right text-sm">
-                                Email
+                              <label htmlFor="edit-contact" className="text-right text-sm">
+                                Nomor Kontak
                               </label>
                               <Input
-                                id="edit-email"
-                                type="email"
+                                id="edit-contact"
                                 className="col-span-3"
-                                value={editingDoctor.email || ""}
+                                value={editingDoctor.contact || ""}
                                 onChange={(e) => setEditingDoctor({
                                   ...editingDoctor,
-                                  email: e.target.value
-                                })}
-                              />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="edit-phone" className="text-right text-sm">
-                                Nomor Telepon
-                              </label>
-                              <Input
-                                id="edit-phone"
-                                className="col-span-3"
-                                value={editingDoctor.phone || ""}
-                                onChange={(e) => setEditingDoctor({
-                                  ...editingDoctor,
-                                  phone: e.target.value
+                                  contact: e.target.value
                                 })}
                               />
                             </div>
@@ -485,6 +529,9 @@ export default function Doctors() {
                                 className="col-span-3"
                                 onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
                               />
+                              {editingDoctor.photo_url && (
+                                <img src={editingDoctor.photo_url} alt="Preview" className="col-span-3 mt-2 h-24 w-auto" />
+                              )}
                             </div>
                             <div className="grid grid-cols-4 items-start gap-4">
                               <label htmlFor="edit-bio" className="text-right text-sm pt-2">
@@ -528,7 +575,7 @@ export default function Doctors() {
       ) : (
         <div className="bg-gray-50 border rounded-lg p-8 text-center">
           <User className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">Dokter tidak ditemukan</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Dokter Tidak Ditemukan</h3>
           <p className="text-gray-500 mb-4">
             Tidak ada dokter yang sesuai dengan kriteria pencarian Anda.
           </p>

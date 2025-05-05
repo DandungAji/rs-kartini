@@ -10,21 +10,26 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { user, logout } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate("/admin/login");
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/admin/login");
+    try {
+      console.log("Attempting logout");
+      await signOut();
+      console.log("Logout successful");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const navItems = [
@@ -90,10 +95,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             Logged in as
           </div>
           <div className="font-medium">
-            {user?.username || 'Loading...'}
+            {loading ? "Loading..." : (user?.user_metadata?.full_name || user?.email || "Unknown")}
           </div>
           <div className="text-sm text-gray-500">
-            {user?.role || 'Loading...'}
+            {loading ? "Loading..." : (user?.user_metadata?.role || "Unknown")}
           </div>
         </div>
 

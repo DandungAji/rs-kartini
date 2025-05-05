@@ -32,6 +32,7 @@ import { supabase } from "@/lib/supabase";
 import { Calendar, Clock, Edit, Filter, Search, Plus, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Doctor {
   id: string;
@@ -42,14 +43,14 @@ interface Schedule {
   id: string;
   doctor_id: string;
   doctor?: { name: string };
-  day: string;
+  days: string;
   start_time: string;
   end_time: string;
-  location?: string;
   status: "active" | "inactive";
 }
 
 export default function Schedules() {
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -62,27 +63,41 @@ export default function Schedules() {
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [newSchedule, setNewSchedule] = useState<Partial<Schedule>>({
     doctor_id: "",
-    day: "Monday",
+    days: "Senin",
     start_time: "",
     end_time: "",
-    location: "",
     status: "active"
   });
 
   // Fetch schedules and doctors on mount
   useEffect(() => {
+    if (!user) return;
+
     const fetchSchedules = async () => {
       const { data, error } = await supabase
         .from('schedules')
-        .select('id, doctor_id, doctors(name), day, start_time, end_time, location, status');
+        .select(`
+          id, 
+          doctor_id, 
+          doctor:doctors!doctor_id(name), 
+          days, 
+          start_time, 
+          end_time, 
+          status
+        `);
       if (error) {
         toast({
-          title: "Error",
-          description: "Gagal mengambil data jadwal.",
+          title: "Kesalahan",
+          description: "Gagal mengambil data jadwal: " + error.message,
           variant: "destructive",
         });
+        console.error("Fetch schedules error:", error);
       } else {
-        setSchedules(data);
+        setSchedules(data.map(schedule => ({
+          ...schedule,
+          doctor: schedule.doctor || { name: 'Dokter Tidak Diketahui' }
+        })));
+        console.log("Schedules fetched:", data);
       }
     };
 
@@ -93,23 +108,28 @@ export default function Schedules() {
         .order('name');
       if (error) {
         toast({
-          title: "Error",
-          description: "Gagal mengambil data dokter.",
+          title: "Kesalahan",
+          description: "Gagal mengambil data dokter: " + error.message,
           variant: "destructive",
         });
+        console.error("Fetch doctors error:", error);
       } else {
         setDoctors(data);
+        if (data.length > 0) {
+          setNewSchedule(prev => ({ ...prev, doctor_id: data[0].id }));
+        }
+        console.log("Doctors fetched:", data);
       }
     };
 
     fetchSchedules();
     fetchDoctors();
-  }, []);
+  }, [user]);
 
   // Filter schedules
   const filteredSchedules = schedules.filter((schedule) => {
     const doctorMatch = selectedDoctor === "all" || schedule.doctor_id === selectedDoctor;
-    const dayMatch = selectedDay === "all" || schedule.day === selectedDay;
+    const dayMatch = selectedDay === "all" || schedule.days === selectedDay;
     const searchMatch =
       !searchTerm ||
       (schedule.doctor?.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -120,8 +140,19 @@ export default function Schedules() {
   const handleAddSchedule = async () => {
     if (!newSchedule.doctor_id || !newSchedule.start_time || !newSchedule.end_time) {
       toast({
-        title: "Missing Information",
+        title: "Informasi Kurang",
         description: "Harap isi dokter, waktu mulai, dan waktu selesai.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validasi format waktu (HH.MM)
+    const timeRegex = /^([0-1]?[0-9]|2[0-3])\.[0-5][0-9]$/;
+    if (!timeRegex.test(newSchedule.start_time) || !timeRegex.test(newSchedule.end_time)) {
+      toast({
+        title: "Format Waktu Salah",
+        description: "Waktu harus dalam format HH.MM (contoh: 08.00).",
         variant: "destructive",
       });
       return;
@@ -131,33 +162,40 @@ export default function Schedules() {
       .from('schedules')
       .insert([{
         doctor_id: newSchedule.doctor_id,
-        day: newSchedule.day,
+        days: newSchedule.days,
         start_time: newSchedule.start_time,
         end_time: newSchedule.end_time,
-        location: newSchedule.location,
         status: newSchedule.status
       }])
-      .select('id, doctor_id, doctors(name), day, start_time, end_time, location, status')
+      .select(`
+        id, 
+        doctor_id, 
+        doctor:doctors!doctor_id(name), 
+        days, 
+        start_time, 
+        end_time, 
+        status
+      `)
       .single();
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal menambah jadwal.",
+        title: "Kesalahan",
+        description: "Gagal menambah jadwal: " + error.message,
         variant: "destructive",
       });
+      console.error("Insert error:", error);
     } else {
-      setSchedules([...schedules, data]);
+      setSchedules([...schedules, { ...data, doctor: data.doctor || { name: 'Dokter Tidak Diketahui' } }]);
       toast({
-        title: "Schedule Added",
+        title: "Jadwal Ditambahkan",
         description: "Jadwal berhasil ditambahkan.",
       });
       setNewSchedule({
-        doctor_id: "",
-        day: "Monday",
+        doctor_id: doctors[0]?.id || "",
+        days: "Senin",
         start_time: "",
         end_time: "",
-        location: "",
         status: "active"
       });
       setIsDialogOpen(false);
@@ -172,30 +210,49 @@ export default function Schedules() {
   const handleSave = async () => {
     if (!editingSchedule) return;
 
+    // Validasi format waktu (HH.MM)
+    const timeRegex = /^([0-1]?[0-9]|2[0-3])\.[0-5][0-9]$/;
+    if (!timeRegex.test(editingSchedule.start_time) || !timeRegex.test(editingSchedule.end_time)) {
+      toast({
+        title: "Format Waktu Salah",
+        description: "Waktu harus dalam format HH.MM (contoh: 08.00).",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { data, error } = await supabase
       .from('schedules')
       .update({
         doctor_id: editingSchedule.doctor_id,
-        day: editingSchedule.day,
+        days: editingSchedule.days,
         start_time: editingSchedule.start_time,
         end_time: editingSchedule.end_time,
-        location: editingSchedule.location,
         status: editingSchedule.status
       })
       .eq('id', editingSchedule.id)
-      .select('id, doctor_id, doctors(name), day, start_time, end_time, location, status')
+      .select(`
+        id, 
+        doctor_id, 
+        doctor:doctors!doctor_id(name), 
+        days, 
+        start_time, 
+        end_time, 
+        status
+      `)
       .single();
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal memperbarui jadwal.",
+        title: "Kesalahan",
+        description: "Gagal memperbarui jadwal: " + error.message,
         variant: "destructive",
       });
+      console.error("Update error:", error);
     } else {
-      setSchedules(schedules.map(s => s.id === data.id ? data : s));
+      setSchedules(schedules.map(s => s.id === data.id ? { ...data, doctor: data.doctor || { name: 'Dokter Tidak Diketahui' } } : s));
       toast({
-        title: "Schedule Updated",
+        title: "Jadwal Diperbarui",
         description: "Jadwal berhasil diperbarui.",
       });
       setIsDialogOpen(false);
@@ -211,28 +268,32 @@ export default function Schedules() {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal menghapus jadwal.",
+        title: "Kesalahan",
+        description: "Gagal menghapus jadwal: " + error.message,
         variant: "destructive",
       });
+      console.error("Delete error:", error);
     } else {
       setSchedules(schedules.filter(s => s.id !== id));
       toast({
-        title: "Schedule Deleted",
+        title: "Jadwal Dihapus",
         description: "Jadwal berhasil dihapus.",
       });
     }
   };
 
   const days = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jumat",
+    "Sabtu",
+    "Minggu",
   ];
+
+  if (loading) return <div className="p-4">Memuat...</div>;
+  if (!user) return <div className="p-4">Harap login untuk mengakses halaman ini.</div>;
 
   return (
     <AdminLayout>
@@ -315,9 +376,10 @@ export default function Schedules() {
                         ? setEditingSchedule(prev => prev ? { ...prev, doctor_id: value } : null)
                         : setNewSchedule({ ...newSchedule, doctor_id: value })
                     }
+                    disabled={doctors.length === 0}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih dokter" />
+                      <SelectValue placeholder={doctors.length === 0 ? "Tidak ada dokter" : "Pilih dokter"} />
                     </SelectTrigger>
                     <SelectContent>
                       {doctors.map((doctor) => (
@@ -336,11 +398,11 @@ export default function Schedules() {
                 </Label>
                 <div className="col-span-3">
                   <Select
-                    value={editingSchedule ? editingSchedule.day : newSchedule.day}
+                    value={editingSchedule ? editingSchedule.days : newSchedule.days}
                     onValueChange={(value) =>
                       editingSchedule
-                        ? setEditingSchedule(prev => prev ? { ...prev, day: value } : null)
-                        : setNewSchedule({ ...newSchedule, day: value })
+                        ? setEditingSchedule(prev => prev ? { ...prev, days: value } : null)
+                        : setNewSchedule({ ...newSchedule, days: value })
                     }
                   >
                     <SelectTrigger>
@@ -364,7 +426,7 @@ export default function Schedules() {
                 <div className="col-span-3">
                   <Input
                     id="startTime"
-                    type="time"
+                    placeholder="08.00"
                     value={editingSchedule ? editingSchedule.start_time : newSchedule.start_time}
                     onChange={(e) =>
                       editingSchedule
@@ -382,30 +444,12 @@ export default function Schedules() {
                 <div className="col-span-3">
                   <Input
                     id="endTime"
-                    type="time"
+                    placeholder="12.00"
                     value={editingSchedule ? editingSchedule.end_time : newSchedule.end_time}
                     onChange={(e) =>
                       editingSchedule
                         ? setEditingSchedule(prev => prev ? { ...prev, end_time: e.target.value } : null)
                         : setNewSchedule({ ...newSchedule, end_time: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="location" className="text-right">
-                  Lokasi
-                </Label>
-                <div className="col-span-3">
-                  <Input
-                    id="location"
-                    placeholder="Nomor ruangan"
-                    value={editingSchedule ? editingSchedule.location : newSchedule.location}
-                    onChange={(e) =>
-                      editingSchedule
-                        ? setEditingSchedule(prev => prev ? { ...prev, location: e.target.value } : null)
-                        : setNewSchedule({ ...newSchedule, location: e.target.value })
                     }
                   />
                 </div>
@@ -437,6 +481,12 @@ export default function Schedules() {
             </div>
             
             <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setIsDialogOpen(false);
+                setEditingSchedule(null);
+              }}>
+                Batal
+              </Button>
               <Button onClick={editingSchedule ? handleSave : handleAddSchedule}>
                 {editingSchedule ? "Simpan Perubahan" : "Tambah Jadwal"}
               </Button>
@@ -453,7 +503,6 @@ export default function Schedules() {
               <TableHead className="w-[250px]">Dokter</TableHead>
               <TableHead>Hari</TableHead>
               <TableHead>Waktu</TableHead>
-              <TableHead>Lokasi</TableHead>
               <TableHead className="text-center">Status</TableHead>
               <TableHead className="text-right w-[120px]">Aksi</TableHead>
             </TableRow>
@@ -465,7 +514,7 @@ export default function Schedules() {
                   <TableCell className="font-medium">
                     {schedule.doctor?.name || "Dokter Tidak Diketahui"}
                   </TableCell>
-                  <TableCell>{schedule.day}</TableCell>
+                  <TableCell>{schedule.days}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-2 text-primary" />
@@ -474,7 +523,6 @@ export default function Schedules() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{schedule.location || '-'}</TableCell>
                   <TableCell className="text-center">
                     <Badge
                       variant={schedule.status === "active" ? "default" : "outline"}
@@ -508,7 +556,7 @@ export default function Schedules() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   Tidak ada jadwal ditemukan.
                 </TableCell>
               </TableRow>
