@@ -21,7 +21,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 bg-white shadow-sm z-50">
+      <nav className="sticky top-0 bg-background shadow-sm z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
@@ -62,7 +62,7 @@ export default function Navbar() {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white shadow-lg animate-fade-in">
+          <div className="md:hidden bg-background shadow-lg animate-fade-in">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navItems.map((item) => (
                 <Link

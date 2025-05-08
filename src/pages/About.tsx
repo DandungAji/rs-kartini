@@ -10,8 +10,8 @@ export default function About() {
       <Navbar />
       
       <PageHeader 
-        title="About Rumah Sakit Kartini" 
-        subtitle="Excellence in healthcare since 1990"
+        title="Tentang Rumah Sakit Kartini" 
+        subtitle="Unggul dalam perawatan kesehatan sejak tahun 1988"
       />
       
       <div className="container mx-auto px-4 py-12">
@@ -91,27 +91,32 @@ export default function About() {
         {/* Mission, Vision, Values */}
         <section className="mb-16">
           <Tabs defaultValue="mission" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="mission">Mission</TabsTrigger>
-              <TabsTrigger value="vision">Vision</TabsTrigger>
-              <TabsTrigger value="values">Core Values</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-primary text-muted-foreground">
+              <TabsTrigger value="mission">Misi</TabsTrigger>
+              <TabsTrigger value="vision">Visi</TabsTrigger>
+              {/* <TabsTrigger value="values">Core Values</TabsTrigger> */}
             </TabsList>
             <TabsContent value="mission" className="p-6 bg-secondary rounded-lg mt-4">
-              <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
-              <p className="text-gray-700 mb-4">
-                At Rumah Sakit Kartini, our mission is to provide accessible, high-quality healthcare services to our community. We strive to deliver compassionate care that addresses not just the physical, but also the emotional and social well-being of each patient.
-              </p>
-              <p className="text-gray-700">
-                We are committed to continuously improving our services through education, research, and the implementation of evidence-based practices, ensuring that we meet the evolving healthcare needs of the diverse population we serve.
-              </p>
+              <h3 className="text-2xl font-bold mb-4">Misi Kami</h3>
+              <ul className="list-disc pl-6 space-y-3">
+                <li className="text-gray-700">
+                Memberikan pelayanan kesehatan yang aman, cepat, tepat dan akurat
+                </li>
+                <li className="text-gray-700">
+                Memberikan pelayanan “Hospitel” (Hospital hotel) dan “One Stop Service”.
+                </li>
+                <li className="text-gray-700">
+                Meningkatkan kualitas sumber daya manusia terkait pelayanan kesehatan melalui pengelolaan kegiatan pelatihan dan pendidikan sesuai dengan perkembangan ilmu pengetahuan dan teknologi.
+                </li>
+                <li className="text-gray-700">
+                Berpartisipasi aktif dalam meningkatkan kesehatan masyarakat melalui pelayanan kesehatan preventif, promotif, kuratif dan rehabilitatif.
+                </li>
+              </ul>
             </TabsContent>
             <TabsContent value="vision" className="p-6 bg-secondary rounded-lg mt-4">
-              <h3 className="text-2xl font-bold mb-4">Our Vision</h3>
+              <h3 className="text-2xl font-bold mb-4">Visi Kami</h3>
               <p className="text-gray-700 mb-4">
-                We envision Rumah Sakit Kartini as a leader in healthcare innovation and excellence, recognized for our exceptional patient outcomes, cutting-edge medical technology, and dedicated healthcare professionals.
-              </p>
-              <p className="text-gray-700">
-                We aim to be the healthcare provider of choice, known for fostering a healing environment where patients feel valued, respected, and empowered in their healthcare journey. Through strategic partnerships and community engagement, we aspire to contribute significantly to improving the overall health and wellness of our community.
+              Menjadi rumah sakit pilihan utama masyarakat dengan memberikan mutu pelayanan yang prima yang berfokus pada keselamatan dan kepuasan pasien.
               </p>
             </TabsContent>
             <TabsContent value="values" className="p-6 bg-secondary rounded-lg mt-4">

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,21 +17,21 @@ export default function Index() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="hero py-16 md:py-24">
+      <section className="hero py-16 md:py-24 bg-hero-gradient">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 md:pr-8 text-center md:text-left mb-10 md:mb-0">
-              <h1 className="text-3xl md:text-5xl font-bold mb-6">
-              Jangan Lewatkan Kesempatan Terbaik
+              <h1 className="text-3xl md:text-5xl font-bold mb-6 text-foreground">
+                Jangan Lewatkan Kesempatan Terbaik
               </h1>
-              <p className="text-lg md:text-xl mb-8 opacity-90">
-              Selalu pantau website kami untuk informasi eksklusif dan penawaran spesial
+              <p className="text-lg md:text-l mb-8 text-muted">
+                Selalu pantau website kami untuk informasi eksklusif dan penawaran spesial
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Button asChild size="lg" className="font-semibold">
+                <Button asChild size="lg" className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90">
                   <Link to="/doctor-schedule">Cari Dokter</Link>
                 </Button>
-                <Button asChild variant="secondary" size="lg">
+                <Button asChild variant="secondary" size="lg" className="bg-secondary text-foreground hover:bg-secondary/80">
                   <Link to="/services">Layanan Kami</Link>
                 </Button>
               </div>
@@ -49,45 +48,45 @@ export default function Index() {
       </section>
 
       {/* Quick Info Cards */}
-      <section className="bg-white py-12">
+      <section className="bg-background py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-secondary border-none">
+            <Card className="bg-card border-primary">
               <CardContent className="p-6 flex items-center">
                 <Phone className="h-10 w-10 text-primary mr-4" />
                 <div>
-                  <h3 className="font-semibold text-lg">Kontak Darurat</h3>
-                  <p className="text-gray-600">+62 851-7964-8841</p>
+                  <h3 className="font-semibold text-lg text-foreground">Kontak Darurat</h3>
+                  <p className="text-muted">+62 851-7964-8841</p>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-secondary border-none">
+            <Card className="bg-card border-primary">
               <CardContent className="p-6 flex items-center">
                 <Clock className="h-10 w-10 text-primary mr-4" />
                 <div>
-                  <h3 className="font-semibold text-lg">Working Hours</h3>
-                  <p className="text-gray-600">Mon-Fri: 8AM-6PM</p>
+                  <h3 className="font-semibold text-lg text-foreground">Working Hours</h3>
+                  <p className="text-muted">Mon-Fri: 8AM-6PM</p>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-secondary border-none">
+            <Card className="bg-card border-primary">
               <CardContent className="p-6 flex items-center">
                 <Calendar className="h-10 w-10 text-primary mr-4" />
                 <div>
-                  <h3 className="font-semibold text-lg">Appointments</h3>
-                  <p className="text-gray-600">Book Online or Call</p>
+                  <h3 className="font-semibold text-lg text-foreground">Appointments</h3>
+                  <p className="text-muted">Book Online or Call</p>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-secondary border-none">
+            <Card className="bg-card border-primary">
               <CardContent className="p-6 flex items-center">
                 <MapPin className="h-10 w-10 text-primary mr-4" />
                 <div>
-                  <h3 className="font-semibold text-lg">Lokasi</h3>
-                  <p className="text-gray-600">Jl. Pahlawan</p>
+                  <h3 className="font-semibold text-lg text-foreground">Lokasi</h3>
+                  <p className="text-muted">Jl. Pahlawan</p>
                 </div>
               </CardContent>
             </Card>
@@ -96,11 +95,11 @@ export default function Index() {
       </section>
 
       {/* Featured Services */}
-      <section className="section">
+      <section className="section bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="section-title">Layanan Kami</h2>
-          <p className="section-subtitle">
-          Temukan beragam layanan spesialis dan fasilitas pendukung kesehatan yang siap melayani Anda dengan sepenuh hati.
+          <h2 className="section-title text-foreground">Layanan Kami</h2>
+          <p className="section-subtitle text-muted">
+            Temukan beragam layanan spesialis dan fasilitas pendukung kesehatan yang siap melayani Anda dengan sepenuh hati.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -109,15 +108,15 @@ export default function Index() {
               const IconComponent = (LucideIcons[service.icon as keyof typeof LucideIcons] || LucideIcons.Activity) as React.ElementType;
               
               return (
-                <Card key={service.id} className="border-none shadow-md hover:shadow-lg transition-shadow">
+                <Card key={service.id} className="border-primary shadow-md hover:shadow-lg transition-shadow bg-card">
                   <CardContent className="p-6 text-center">
                     <div className="flex justify-center mb-4">
-                      <div className="p-3 bg-secondary rounded-full">
+                      <div className="p-3 bg-popover rounded-full">
                         <IconComponent className="h-8 w-8 text-primary" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-bold mb-2">{service.name}</h3>
-                    <p className="text-gray-600 mb-4">{service.description}</p>
+                    <h3 className="text-xl font-bold mb-2 text-foreground">{service.name}</h3>
+                    <p className="text-muted mb-4">{service.description}</p>
                     <Button asChild variant="link" className="text-primary">
                       <Link to={`/services#${service.id}`}>Baca Selengkapnya</Link>
                     </Button>
@@ -128,7 +127,7 @@ export default function Index() {
           </div>
           
           <div className="text-center mt-12">
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Link to="/services">Lihat Semua Layanan</Link>
             </Button>
           </div>
@@ -147,32 +146,32 @@ export default function Index() {
               />
             </div>
             <div className="md:w-1/2 md:pl-12">
-              <h2 className="text-3xl font-bold mb-6">Why Choose MedHub Hospital?</h2>
+              <h2 className="text-3xl font-bold mb-6 text-foreground">Kenapa memilih RS Kartini Bandung?</h2>
               
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Expert Medical Team</h3>
-                  <p className="text-gray-700">Our doctors and medical staff are leaders in their fields, dedicated to providing exceptional care.</p>
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">Tim Medis Ahli</h3>
+                  <p className="text-muted">Para dokter dan staf medis kami adalah para ahli di bidangnya, yang berdedikasi untuk memberikan perawatan yang luar biasa.</p>
                 </div>
                 
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Advanced Technology</h3>
-                  <p className="text-gray-700">We invest in the latest medical equipment and technologies to enhance diagnosis accuracy and treatment effectiveness.</p>
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">Teknologi Canggih</h3>
+                  <p className="text-muted">Kami berinvestasi dalam peralatan dan teknologi medis terbaru untuk meningkatkan akurasi diagnosis dan efektivitas pengobatan.</p>
                 </div>
                 
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Patient-Centered Care</h3>
-                  <p className="text-gray-700">Your comfort, dignity, and individual needs are at the center of our healthcare approach.</p>
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">Perawatan yang Berpusat pada Pasien</h3>
+                  <p className="text-muted">Kenyamanan, martabat, dan kebutuhan individu Anda adalah pusat dari pendekatan perawatan kesehatan kami.</p>
                 </div>
                 
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Comprehensive Services</h3>
-                  <p className="text-gray-700">From preventive care to complex treatments, we offer a full range of medical services under one roof.</p>
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">Layanan Komprehensif</h3>
+                  <p className="text-muted">Dari perawatan pencegahan hingga perawatan yang rumit, kami menawarkan berbagai layanan medis dalam satu atap.</p>
                 </div>
               </div>
               
-              <Button asChild className="mt-8">
-                <Link to="/about">Learn About Our Hospital</Link>
+              <Button asChild className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link to="/about">Pelajari Tentang Rumah Sakit Kami</Link>
               </Button>
             </div>
           </div>
@@ -180,18 +179,18 @@ export default function Index() {
       </section>
 
       {/* CTA Section */}
-      <section className="section bg-primary text-white">
+      <section className="section bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Need Medical Assistance?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Butuh Bantuan Medis?</h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Our team of medical professionals is ready to provide the care you need.
+            Tim medis profesional kami siap memberikan perawatan yang Anda butuhkan.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" variant="secondary" className="text-primary font-semibold">
-              <Link to="/doctor-schedule">Schedule an Appointment</Link>
+            <Button asChild size="lg" className="bg-secondary text-foreground hover:bg-secondary/80">
+              <Link to="/doctor-schedule">Jadwalkan Janji Temu</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
-              <Link to="/contact">Contact Us</Link>
+            <Button asChild size="lg" variant="outline" className="text-foreground border-primary-foreground hover:bg-primary-foreground/10">
+              <Link to="/contact">Kontak Kami</Link>
             </Button>
           </div>
         </div>

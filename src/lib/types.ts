@@ -1,30 +1,3 @@
-
-export type Doctor = {
-  id: string;
-  name: string;
-  specialization: string;
-  imageUrl?: string;
-  bio?: string;
-  email?: string;
-  phone?: string;
-};
-
-export type Department = {
-  id: string;
-  name: string;
-  description?: string;
-};
-
-export type Schedule = {
-  id: string;
-  doctorId: string;
-  day: "Senin" | "Selasa" | "Rabu" | "Kamis" | "Jumat" | "Sabtu";
-  startTime: string;
-  endTime: string;
-  location?: string;
-  status: "active" | "inactive";
-};
-
 export type Service = {
   id: string;
   name: string;
@@ -34,22 +7,4 @@ export type Service = {
   detailedDescription?: string;
   benefits?: string[];
   procedures?: string[];
-};
-
-export type Post = {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  author: string;
-  publishDate: string;
-  status: "draft" | "published";
-  imageUrl?: string;
-  summary?: string;
-};
-
-export type PostCategory = {
-  id: string;
-  name: string;
-  slug: string;
 };

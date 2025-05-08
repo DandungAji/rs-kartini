@@ -46,8 +46,8 @@ export default function Services() {
       <Navbar />
       
       <PageHeader 
-        title="Our Services" 
-        subtitle="Comprehensive healthcare services for all your medical needs"
+        title="Layanan Kami" 
+        subtitle="Layanan kesehatan yang komprehensif untuk semua kebutuhan medis Anda"
       />
       
       <div className="container mx-auto px-4 py-12">
@@ -55,10 +55,10 @@ export default function Services() {
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Input
-              placeholder="Search services..."
+              placeholder="Cari layanan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
+              className="w-full border-primary focus:ring-primary"
             />
           </div>
           <div>
@@ -66,11 +66,11 @@ export default function Services() {
               value={selectedCategory}
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by category" />
+              <SelectTrigger className="w-full border-primary focus:ring-primary">
+                <SelectValue placeholder="Filter kategori" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">Semua Kategori</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category}
@@ -111,7 +111,7 @@ export default function Services() {
         {/* No results message */}
         {filteredServices.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No services matching your search criteria.</p>
+            <p className="text-gray-500">Tidak ada layanan yang sesuai dengan kriteria pencarian Anda.</p>
           </div>
         )}
         
@@ -140,14 +140,14 @@ export default function Services() {
                   
                   {selectedService.detailedDescription && (
                     <div className="mb-6">
-                      <h4 className="text-lg font-medium mb-2">About This Service</h4>
+                      <h4 className="text-lg font-medium mb-2">Tentang Layanan Ini</h4>
                       <p className="text-gray-600">{selectedService.detailedDescription}</p>
                     </div>
                   )}
                   
                   {selectedService.procedures && selectedService.procedures.length > 0 && (
                     <div className="mb-6">
-                      <h4 className="text-lg font-medium mb-2">Procedures Included</h4>
+                      <h4 className="text-lg font-medium mb-2">Prosedur yang Disertakan</h4>
                       <ul className="space-y-1">
                         {selectedService.procedures.map((procedure, index) => (
                           <li key={index} className="flex items-start">
@@ -161,7 +161,7 @@ export default function Services() {
                   
                   {selectedService.benefits && selectedService.benefits.length > 0 && (
                     <div>
-                      <h4 className="text-lg font-medium mb-2">Benefits</h4>
+                      <h4 className="text-lg font-medium mb-2">Keuntungan</h4>
                       <ul className="space-y-1">
                         {selectedService.benefits.map((benefit, index) => (
                           <li key={index} className="flex items-start">
@@ -179,23 +179,23 @@ export default function Services() {
         </Dialog>
         
         {/* Additional Info */}
-        <div className="mt-16 bg-secondary rounded-lg p-8">
-          <h2 className="text-2xl font-bold mb-4">Need Specialized Care?</h2>
-          <p className="text-gray-700 mb-4">
-            Our hospital offers a wide range of specialized medical services beyond what's listed here. 
-            If you have specific healthcare needs or questions, please contact our medical team for personalized assistance.
+        <div className="mt-16 bg-primary rounded-lg p-8">
+          <h2 className="text-2xl text-muted-foreground font-bold mb-4">Butuh Perawatan Khusus?</h2>
+          <p className="text-secondary mb-4">
+          Rumah sakit kami menawarkan berbagai layanan medis. 
+          Jika Anda memiliki kebutuhan perawatan kesehatan khusus atau pertanyaan, silakan hubungi tim medis kami untuk mendapatkan bantuan khusus.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <div className="bg-white p-6 rounded-md shadow-sm">
               <h3 className="text-lg font-semibold mb-2">Emergency Services</h3>
               <p className="text-gray-600">
-                24/7 emergency care for urgent medical situations. Call (555) 123-4567 for immediate assistance.
+              Perawatan darurat 24/7 untuk situasi medis yang mendesak. Hubungi +62 851-7964-8841 untuk bantuan segera.
               </p>
             </div>
             <div className="bg-white p-6 rounded-md shadow-sm">
-              <h3 className="text-lg font-semibold mb-2">Appointment Booking</h3>
+              <h3 className="text-lg font-semibold mb-2">Penjadwalan Janji Temu</h3>
               <p className="text-gray-600">
-                Schedule routine appointments through our online portal or by calling our reception at (555) 765-4321.
+              Jadwalkan janji temu rutin melalui portal online kami atau dengan menghubungi resepsionis kami di +62 878-1988-1010.
               </p>
             </div>
           </div>

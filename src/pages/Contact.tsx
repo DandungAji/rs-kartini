@@ -1,4 +1,4 @@
-
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -57,24 +57,24 @@ export default function Contact() {
       <Navbar />
       
       <PageHeader 
-        title="Contact Us" 
-        subtitle="Get in touch with our team for inquiries and appointments"
+        title="Kontak Kami" 
+        subtitle=" Hubungi tim kami untuk pertanyaan dan janji temu"
       />
       
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Info */}
           <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
+            <h2 className="text-2xl font-bold mb-6">Informasi Kontak</h2>
             
             <div className="space-y-6">
               <div className="flex">
                 <Phone className="h-6 w-6 text-primary mr-3 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold mb-1">Phone</h3>
-                  <p className="text-gray-600 mb-1">General: (555) 123-4567</p>
-                  <p className="text-gray-600 mb-1">Emergency: (555) 911-1234</p>
-                  <p className="text-gray-600">Appointments: (555) 765-4321</p>
+                  <h3 className="font-semibold mb-1">Telepon</h3>
+                  <p className="text-gray-600 mb-1">Umum: (555) 123-4567</p>
+                  <p className="text-gray-600 mb-1">Darurat: (555) 911-1234</p>
+                  <p className="text-gray-600">Janji/booking: (555) 765-4321</p>
                 </div>
               </div>
               
@@ -82,37 +82,27 @@ export default function Contact() {
                 <Mail className="h-6 w-6 text-primary mr-3 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold mb-1">Email</h3>
-                  <p className="text-gray-600 mb-1">General Inquiries: info@medhub.com</p>
-                  <p className="text-gray-600 mb-1">Appointments: appointments@medhub.com</p>
-                  <p className="text-gray-600">Support: support@medhub.com</p>
+                  <p className="text-gray-600 mb-1">Kebutuhan Umum: marketing@rskartini.id</p>
                 </div>
               </div>
               
               <div className="flex">
                 <MapPin className="h-6 w-6 text-primary mr-3 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold mb-1">Location</h3>
-                  <p className="text-gray-600 mb-1">123 Hospital Street</p>
-                  <p className="text-gray-600 mb-1">Medical District</p>
-                  <p className="text-gray-600">Healthville, HV 12345</p>
+                  <h3 className="font-semibold mb-1">Lokasi</h3>
+                  <p className="text-gray-600 mb-1">Jl. Pahlawan No. 48, Neglasari, Kec. Cibeunying Kaler</p>
+                  <p className="text-gray-600 mb-1">Bandung</p>
+                  <p className="text-gray-600">Jawa Barat, 40124</p>
                 </div>
               </div>
             </div>
             
             <div className="mt-8">
-              <h2 className="text-2xl font-bold mb-4">Hours of Operation</h2>
+              <h2 className="text-2xl font-bold mb-4">Jam Operasional</h2>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span>Monday - Friday:</span>
-                  <span>8:00 AM - 6:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Saturday:</span>
-                  <span>9:00 AM - 3:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Sunday:</span>
-                  <span>Closed</span>
+                  <span>Poliklinik:</span>
+                  <span className="text-primary"><Link to="/doctor-schedule">Lihat Jadwal</Link></span>
                 </div>
                 <div className="flex justify-between font-semibold text-primary mt-2">
                   <span>Emergency Services:</span>
@@ -124,13 +114,13 @@ export default function Contact() {
           
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
+            <h2 className="text-2xl font-bold mb-6">Kirim Pesan</h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="name" className="block text-sm font-medium">
-                    Your Name
+                    Nama Anda
                   </label>
                   <Input
                     id="name"
@@ -144,7 +134,7 @@ export default function Contact() {
                 
                 <div className="space-y-2">
                   <label htmlFor="email" className="block text-sm font-medium">
-                    Email Address
+                    Alamat Email
                   </label>
                   <Input
                     id="email"
@@ -152,7 +142,7 @@ export default function Contact() {
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="john@example.com"
+                    placeholder="guest@example.com"
                     required
                   />
                 </div>
@@ -161,7 +151,7 @@ export default function Contact() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="phone" className="block text-sm font-medium">
-                    Phone Number
+                    Nomor Telepon
                   </label>
                   <Input
                     id="phone"
@@ -174,7 +164,7 @@ export default function Contact() {
                 
                 <div className="space-y-2">
                   <label htmlFor="subject" className="block text-sm font-medium">
-                    Subject
+                    Subjek
                   </label>
                   <Input
                     id="subject"
@@ -189,7 +179,7 @@ export default function Contact() {
               
               <div className="space-y-2">
                 <label htmlFor="message" className="block text-sm font-medium">
-                  Your Message
+                  Pesan Anda
                 </label>
                 <Textarea
                   id="message"
@@ -211,10 +201,10 @@ export default function Contact() {
         
         {/* Google Maps */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Location</h2>
+          <h2 className="text-2xl font-bold mb-6">Lokasi</h2>
           <div className="h-[400px] bg-gray-200 rounded-lg overflow-hidden">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387193.30591910487!2d-74.25986548248684!3d40.69714941512925!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1649299756259!5m2!1sen!2s"
+              src="https://maps.google.com/maps?width=600&height=400&hl=en&q=rs%20kartini%20bandung&t=&z=14&ie=UTF8&iwloc=B&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0 }}

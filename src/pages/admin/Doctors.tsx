@@ -353,7 +353,7 @@ export default function Doctors() {
               </label>
               <Input
                 id="name"
-                placeholder="Dr. Jane Smith"
+                placeholder="Nama dokter"
                 value={newDoctor.name}
                 onChange={(e) => setNewDoctor({...newDoctor, name: e.target.value})}
                 required
@@ -388,7 +388,7 @@ export default function Doctors() {
               </label>
               <Input
                 id="contact"
-                placeholder="+62 123-4567"
+                placeholder="+62 888 8888 888"
                 value={newDoctor.contact}
                 onChange={(e) => setNewDoctor({...newDoctor, contact: e.target.value})}
               />
@@ -412,7 +412,7 @@ export default function Doctors() {
               </label>
               <Textarea
                 id="bio"
-                placeholder="Dokter Anak Profesional"
+                placeholder="Deskripsi singkat dokter"
                 value={newDoctor.bio}
                 onChange={(e) => setNewDoctor({...newDoctor, bio: e.target.value})}
                 className="min-h-[100px]"
