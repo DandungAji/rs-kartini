@@ -5,61 +5,103 @@ export const services: Service[] = [
   {
     id: "1",
     name: "Rawat Jalan",
-    description: "Perawatan medis efektif tanpa rawat inap di rumah sakit.",
-    icon: "activity",
-    category: "Preventive Care",
-    detailedDescription: "A general checkup involves a thorough examination of your overall health, including vital signs, physical examination, and discussion of any health concerns.",
-    benefits: ["Early detection of health issues", "Personalized health advice", "Preventive care strategies"],
-    procedures: ["Vital signs measurement", "Physical examination", "Health risk assessment"]
+    description: "Perawatan medis cepat dan nyaman tanpa perlu menginap, cocok untuk konsultasi dan pemeriksaan rutin.",
+    icon: "Stethoscope",
+    detailedDescription: "Layanan Rawat Jalan di RS Kartini memberikan solusi kesehatan praktis untuk Anda yang membutuhkan konsultasi dokter, pemeriksaan rutin, atau tindakan medis ringan tanpa harus menginap. Tim medis kami siap mendampingi dengan pelayanan yang cepat dan ramah.",
+    benefits: [
+      "Proses cepat tanpa perlu menginap",
+      "Dokter spesialis yang berpengalaman",
+      "Pelayanan ramah dan personal"
+    ],
+    procedures: [
+      "Konsultasi dengan dokter umum atau spesialis",
+      "Pemeriksaan fisik dan vital sign",
+      "Rujukan tindakan lanjutan jika diperlukan"
+    ]
   },
   {
     id: "2",
     name: "IGD",
-    description: "Perawatan medis darurat yang cepat dan profesional.",
-    icon: "shield",
-    category: "Preventive Care",
-    detailedDescription: "Vaccination is a safe and effective way to protect yourself and your family from infectious diseases. Vaccines stimulate your immune system to produce antibodies that fight off specific pathogens.",
-    benefits: ["Disease prevention", "Community immunity", "Reduced healthcare costs"],
-    procedures: ["Vaccine administration", "Immunization record update", "Post-vaccination monitoring"]
+    description: "Layanan darurat 24/7 untuk penanganan cepat dan profesional di saat kritis.",
+    icon: "Siren",
+    detailedDescription: "Unit Instalasi Gawat Darurat (IGD) RS Kartini siap melayani Anda 24 jam sehari, 7 hari seminggu. Dengan tim medis terlatih dan peralatan canggih, kami memastikan penanganan cepat untuk kondisi darurat seperti kecelakaan, serangan jantung, atau keadaan kritis lainnya.",
+    benefits: [
+      "Respon cepat dalam situasi darurat",
+      "Tim medis ahli yang siaga 24/7",
+      "Fasilitas darurat lengkap"
+    ],
+    procedures: [
+      "Penilaian awal kondisi pasien",
+      "Tindakan medis darurat",
+      "Perawatan stabilisasi sebelum rawat inap"
+    ]
   },
   {
     id: "3",
     name: "Rawat Inap",
-    description: "Perawatan medis intensif di rumah sakit untuk pemulihan pasien.",
-    icon: "droplet",
-    category: "Diagnostics",
-    detailedDescription: "A blood test involves analyzing a sample of your blood to assess various health markers, such as cholesterol levels, blood sugar, and organ function. Blood tests can help diagnose a wide range of medical conditions.",
-    benefits: ["Early disease detection", "Monitoring of treatment effectiveness", "Personalized treatment planning"],
-    procedures: ["Blood sample collection", "Laboratory analysis", "Result interpretation"]
+    description: "Perawatan intensif dengan fasilitas nyaman untuk pemulihan optimal Anda.",
+    icon: "Bed",
+    detailedDescription: "Layanan Rawat Inap RS Kartini menawarkan perawatan intensif dengan kamar yang nyaman dan fasilitas modern. Kami mendampingi pasien selama proses pemulihan, baik pascaoperasi maupun untuk kondisi yang membutuhkan pengawasan medis lebih lanjut.",
+    benefits: [
+      "Kamar rawat inap yang nyaman",
+      "Pengawasan medis 24 jam",
+      "Pelayanan perawat yang peduli"
+    ],
+    procedures: [
+      "Pemeriksaan harian oleh dokter",
+      "Perawatan keperawatan berkala",
+      "Terapi dan pemantauan sesuai kebutuhan"
+    ]
   },
   {
     id: "4",
     name: "Laboratorium",
-    description: "Tes dan analisis medis untuk diagnosis pasien.",
-    icon: "scan",
-    category: "Diagnostics",
-    detailedDescription: "An X-ray is a non-invasive imaging technique that uses electromagnetic radiation to visualize internal structures, such as bones and organs. X-rays are commonly used to diagnose fractures, infections, and other medical conditions.",
-    benefits: ["Non-invasive imaging", "Quick diagnosis", "Detection of internal abnormalities"],
-    procedures: ["Patient positioning", "Radiation exposure", "Image interpretation"]
+    description: "Tes laboratorium akurat untuk diagnosis yang tepat dan cepat.",
+    icon: "Microscope",
+    detailedDescription: "Layanan Laboratorium RS Kartini menyediakan berbagai tes medis, mulai dari pemeriksaan darah, urin, hingga analisis khusus. Dengan teknologi modern, kami memastikan hasil yang akurat untuk mendukung diagnosis dan perawatan Anda.",
+    benefits: [
+      "Hasil tes yang cepat dan akurat",
+      "Beragam jenis pemeriksaan laboratorium",
+      "Dukungan diagnosis yang terpercaya"
+    ],
+    procedures: [
+      "Pengambilan sampel oleh tenaga ahli",
+      "Analisis dengan peralatan modern",
+      "Laporan hasil yang jelas dan rinci"
+    ]
   },
   {
     id: "5",
     name: "Radiologi",
-    description: "Penggunaan teknologi pencitraan untuk diagnosis kondisi medis pasien.",
-    icon: "move",
-    category: "Rehabilitation",
-    detailedDescription: "Physical therapy is a healthcare profession that focuses on restoring and improving physical function and mobility. Physical therapists use a variety of techniques, including exercise, manual therapy, and education, to help patients recover from injuries, manage pain, and improve their overall quality of life.",
-    benefits: ["Pain relief", "Improved mobility", "Injury prevention"],
-    procedures: ["Exercise prescription", "Manual therapy", "Patient education"]
+    description: "Pencitraan medis canggih untuk mendeteksi kondisi Anda secara mendalam.",
+    icon: "ScanHeart",
+    detailedDescription: "Layanan Radiologi RS Kartini menggunakan teknologi pencitraan terkini seperti X-ray, USG untuk membantu dokter mendiagnosis kondisi Anda dengan akurat. Prosedur dilakukan oleh tim radiologi profesional untuk hasil yang optimal.",
+    benefits: [
+      "Teknologi pencitraan mutakhir",
+      "Proses aman dan nyaman",
+      "Hasil akurat untuk diagnosis tepat"
+    ],
+    procedures: [
+      "Pemeriksaan dengan alat radiologi",
+      "Interpretasi hasil oleh radiolog",
+      "Konsultasi hasil dengan dokter"
+    ]
   },
   {
     id: "6",
     name: "Farmasi",
-    description: "Penyediaan obat dan edukasi/informasi penting kepada pasien.",
-    icon: "message-circle",
-    category: "Mental Health",
-    detailedDescription: "Mental health counseling provides support and guidance for individuals experiencing emotional, behavioral, or psychological challenges. Counselors use a variety of therapeutic techniques to help patients cope with stress, anxiety, depression, and other mental health concerns.",
-    benefits: ["Improved emotional well-being", "Stress management", "Enhanced coping skills"],
-    procedures: ["Individual therapy", "Group therapy", "Cognitive-behavioral therapy"]
+    description: "Obat berkualitas dan edukasi kesehatan untuk mendukung penyembuhan Anda.",
+    icon: "Pill",
+    detailedDescription: "Layanan Farmasi RS Kartini menyediakan obat-obatan berkualitas tinggi yang diresepkan dokter, lengkap dengan edukasi penggunaan yang tepat. Apoteker kami siap memberikan informasi untuk memastikan pengobatan Anda berjalan efektif.",
+    benefits: [
+      "Obat asli dan terjamin kualitasnya",
+      "Konsultasi gratis dengan apoteker",
+      "Edukasi penggunaan obat yang aman"
+    ],
+    procedures: [
+      "Penyediaan obat sesuai resep",
+      "Konsultasi dosis dan efek samping",
+      "Pemantauan penggunaan obat"
+    ]
   }
 ];

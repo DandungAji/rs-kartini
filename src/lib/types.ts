@@ -3,7 +3,6 @@ export type Service = {
   name: string;
   description: string;
   icon: string;
-  category?: string;
   detailedDescription?: string;
   benefits?: string[];
   procedures?: string[];

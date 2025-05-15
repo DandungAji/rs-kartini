@@ -42,46 +42,46 @@ export default function About() {
         
         {/* Timeline */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">Our Journey</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">Sejarah Kami</h2>
           <div className="space-y-12">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
-                <h3 className="text-xl font-bold mb-2">1990 - Foundation</h3>
+            <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
+                <h3 className="text-xl font-bold mb-2">1984 - 1988</h3>
                 <p className="text-gray-700">
-                  MedHub opened as a small community clinic with basic primary care services.
+                Praktek Bidan
                 </p>
               </div>
               <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
-                <h3 className="text-xl font-bold mb-2">1998 - Expansion</h3>
+                <h3 className="text-xl font-bold mb-2">1988 - 2001</h3>
                 <p className="text-gray-700">
-                  Added specialized departments including cardiology and pediatrics.
+                Rumah Bersalin Kartini
                 </p>
               </div>
               <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
-                <h3 className="text-xl font-bold mb-2">2005 - New Campus</h3>
+                <h3 className="text-xl font-bold mb-2">2001 - 2006</h3>
                 <p className="text-gray-700">
-                  Moved to our current state-of-the-art facility with expanded capacity.
+                Klinik Spesialis Kebidanan
                 </p>
               </div>
             </div>
             
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
-                <h3 className="text-xl font-bold mb-2">2010 - Research Center</h3>
+            <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
+                <h3 className="text-xl font-bold mb-2">2006 - 2016</h3>
                 <p className="text-gray-700">
-                  Established our medical research center focusing on innovative treatments.
+                Klinik Khusus Kebidanan dan Bedah & Klinik Utama Kebidanan
                 </p>
               </div>
               <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
-                <h3 className="text-xl font-bold mb-2">2015 - Technology Upgrade</h3>
+                <h3 className="text-xl font-bold mb-2">2016 - 2021</h3>
                 <p className="text-gray-700">
-                  Implemented advanced diagnostic equipment and electronic health records.
+                Klinik Utama Kartini
                 </p>
               </div>
               <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
-                <h3 className="text-xl font-bold mb-2">2020 - Present</h3>
+                <h3 className="text-xl font-bold mb-2">2021 - Sekarang</h3>
                 <p className="text-gray-700">
-                  Continuing to expand services while maintaining our commitment to excellence.
+                RS Kartini
                 </p>
               </div>
             </div>

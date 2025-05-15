@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin, Phone } from "lucide-react";
+import emailjs from "@emailjs/browser";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -31,25 +32,43 @@ export default function Contact() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Message Sent",
-        description: "Thank you for your message. We'll respond shortly.",
-      });
-      
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-      });
-      
-      setIsSubmitting(false);
-    }, 1000);
+
+    // Send email using EmailJS
+    emailjs.send(
+      "service_rskrsk48",
+      "template_n6o3dlu",
+      {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+      },
+      "YOUR_USER_ID" // Ganti dengan User ID Anda
+    ).then(
+      (result) => {
+        toast({
+          title: "Pesan Terkirim",
+          description: "Terima kasih atas pesan Anda. Kami akan segera merespons.",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+        setIsSubmitting(false);
+      },
+      (error) => {
+        toast({
+          title: "Error",
+          description: "Gagal mengirim pesan. Silahkan coba lagi.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+      }
+    );
   };
 
   return (
@@ -58,7 +77,7 @@ export default function Contact() {
       
       <PageHeader 
         title="Kontak Kami" 
-        subtitle=" Hubungi tim kami untuk pertanyaan dan janji temu"
+        subtitle="Hubungi tim kami untuk pertanyaan dan janji temu"
       />
       
       <div className="container mx-auto px-4 py-12">
@@ -72,9 +91,8 @@ export default function Contact() {
                 <Phone className="h-6 w-6 text-primary mr-3 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold mb-1">Telepon</h3>
-                  <p className="text-gray-600 mb-1">Umum: (555) 123-4567</p>
-                  <p className="text-gray-600 mb-1">Darurat: (555) 911-1234</p>
-                  <p className="text-gray-600">Janji/booking: (555) 765-4321</p>
+                  <p className="text-gray-600 mb-1">Gawat Darurat: 0851-7964-8841</p>
+                  <p className="text-gray-600">Janji/booking: 0878-1988-1010</p>
                 </div>
               </div>
               
@@ -82,7 +100,7 @@ export default function Contact() {
                 <Mail className="h-6 w-6 text-primary mr-3 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold mb-1">Email</h3>
-                  <p className="text-gray-600 mb-1">Kebutuhan Umum: marketing@rskartini.id</p>
+                  <p className="text-gray-600 mb-1">marketing.rskartini@gmail.com</p>
                 </div>
               </div>
               
@@ -105,7 +123,7 @@ export default function Contact() {
                   <span className="text-primary"><Link to="/doctor-schedule">Lihat Jadwal</Link></span>
                 </div>
                 <div className="flex justify-between font-semibold text-primary mt-2">
-                  <span>Emergency Services:</span>
+                  <span>Layanan Gawat Darurat:</span>
                   <span>24/7</span>
                 </div>
               </div>
@@ -129,6 +147,7 @@ export default function Contact() {
                     onChange={handleChange}
                     placeholder="John Doe"
                     required
+                    className="placeholder:text-gray-400"
                   />
                 </div>
                 
@@ -144,6 +163,7 @@ export default function Contact() {
                     onChange={handleChange}
                     placeholder="guest@example.com"
                     required
+                    className="placeholder:text-gray-400"
                   />
                 </div>
               </div>
@@ -159,6 +179,7 @@ export default function Contact() {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="(555) 123-4567"
+                    className="placeholder:text-gray-400"
                   />
                 </div>
                 
@@ -171,8 +192,9 @@ export default function Contact() {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    placeholder="Appointment Request"
+                    placeholder="Permintaan untuk janji temu"
                     required
+                    className="placeholder:text-gray-400"
                   />
                 </div>
               </div>
@@ -186,14 +208,15 @@ export default function Contact() {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="Please provide details about your inquiry..."
+                  placeholder="Jelaskan kebutuhan anda..."
                   rows={6}
                   required
+                  className="placeholder:text-gray-400"
                 />
               </div>
               
               <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">
-                {isSubmitting ? "Sending..." : "Send Message"}
+                {isSubmitting ? "Mengirim..." : "Kirim Pesan"}
               </Button>
             </form>
           </div>

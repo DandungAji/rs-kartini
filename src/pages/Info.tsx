@@ -17,8 +17,8 @@ interface Post {
   id: string;
   title: string;
   content: string;
-  category: string;
-  author: string;
+  category: { id: string; name: string };
+  author: { id: string; full_name?: string; email?: string };
   publish_date: string;
   status: "published" | "draft";
   image_url: string | null;
@@ -44,7 +44,11 @@ export default function Info() {
 
         const { data, error } = await supabase
           .from("posts")
-          .select("*")
+          .select(`
+            id, title, content, status, publish_date, summary, image_url,
+            category:categories(id, name),
+            author:profiles(id, full_name, email)
+          `)
           .eq("status", "published")
           .order("publish_date", { ascending: false });
 
@@ -57,8 +61,12 @@ export default function Info() {
           id: post.id,
           title: post.title,
           content: post.content,
-          category: post.category,
-          author: post.author,
+          category: post.category ? { id: post.category.id, name: post.category.name } : { id: "", name: "Uncategorized" },
+          author: post.author ? {
+            id: post.author.id,
+            full_name: post.author.full_name || undefined,
+            email: post.author.email || undefined,
+          } : { id: "", full_name: "Anonymous" },
           publish_date: post.publish_date,
           status: post.status,
           image_url: post.image_url || "/placeholder.svg",
@@ -79,7 +87,7 @@ export default function Info() {
 
   // Get unique categories
   const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(posts.map((post) => post.category))];
+    const uniqueCategories = [...new Set(posts.map((post) => post.category.name))];
     return uniqueCategories;
   }, [posts]);
 
@@ -90,8 +98,8 @@ export default function Info() {
         const matchesSearch =
           post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.author.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
+          (post.author.full_name || post.author.email || "").toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = selectedCategory === "all" || post.category.name === selectedCategory;
         return matchesSearch && matchesCategory;
       })
       .sort((a, b) => new Date(b.publish_date).getTime() - new Date(a.publish_date).getTime());
@@ -124,7 +132,7 @@ export default function Info() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             <Input
-              placeholder="Search information..."
+              placeholder="Cari Informasi..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9"
@@ -174,7 +182,7 @@ export default function Info() {
                     className="w-full h-full object-cover"
                   />
                   <Badge className="absolute top-2 right-2">
-                    {post.category}
+                    {post.category.name}
                   </Badge>
                 </div>
                 <CardHeader className="p-4 pb-2">
@@ -186,9 +194,9 @@ export default function Info() {
                   </p>
                 </CardContent>
                 <CardFooter className="p-4 pt-0 text-xs text-muted flex justify-between">
-                  <div className="flex items-center ">
+                  <div className="flex items-center">
                     <User className="h-3 w-3 mr-1 text-muted" />
-                    {post.author}
+                    {post.author.full_name || post.author.email || "Anonymous"}
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-3 w-3 mr-1" />
@@ -214,7 +222,7 @@ export default function Info() {
               <>
                 <DialogHeader>
                   <Badge variant="outline" className="mb-2 w-fit">
-                    {selectedPost.category}
+                    {selectedPost.category.name}
                   </Badge>
                   <DialogTitle className="text-2xl">
                     {selectedPost.title}
@@ -222,7 +230,7 @@ export default function Info() {
                   <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-1" />
-                      {selectedPost.author}
+                      {selectedPost.author.full_name || selectedPost.author.email || "Anonymous"}
                     </div>
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
@@ -255,18 +263,17 @@ export default function Info() {
 
         {/* Additional Info */}
         <div className="mt-16 bg-secondary rounded-lg p-8">
-          <h2 className="text-2xl font-bold mb-4">Subscribe to Our Newsletter</h2>
+          <h2 className="text-2xl font-bold mb-4">Berlangganan Buletin Kami</h2>
           <p className="text-gray-700 mb-6">
-            Stay updated with the latest health tips, hospital news, and community events.
-            Our monthly newsletter provides valuable information to help you and your family stay healthy.
+            Dapatkan informasi terbaru tentang tips kesehatan terbaru, berita rumah sakit, dan acara komunitas. Buletin bulanan kami memberikan informasi berharga untuk membantu Anda dan keluarga Anda tetap sehat.
           </p>
           <div className="flex flex-col md:flex-row gap-4">
             <Input
-              placeholder="Enter your email address"
+              placeholder="Masukkan email anda"
               type="email"
               className="md:flex-grow"
             />
-            <Button>Subscribe</Button>
+            <Button>Langganan</Button>
           </div>
         </div>
       </div>

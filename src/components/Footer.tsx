@@ -18,9 +18,9 @@ export default function Footer() {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Halaman</h3>
             <ul className="space-y-2 text-foreground">
-              <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
+              <li><Link to="/" className="hover:text-primary transition-colors">Beranda</Link></li>
               <li><Link to="/services" className="hover:text-primary transition-colors">Layanan</Link></li>
               <li><Link to="/doctor-schedule" className="hover:text-primary transition-colors">Jadwal Dokter</Link></li>
               <li><Link to="/about" className="hover:text-primary transition-colors">Tentang</Link></li>
@@ -49,7 +49,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center">
                 <Mail size={18} className="mr-2 text-primary" />
-                <span>marketing@rskartini.id</span>
+                <span>marketing.rskartini@gmail.com</span>
               </li>
               <li className="flex">
                 <MapPin size={18} className="mr-2 text-primary" />
@@ -60,7 +60,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-foreground">
-          <p>&copy;{currentYear} IT RS Kartini. All rights reserved.</p>
+          <p>&copy;{currentYear} IT RS Kartini. Hak cipta dilindungi undang-undang.</p>
         </div>
       </div>
     </footer>
