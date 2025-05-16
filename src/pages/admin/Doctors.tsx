@@ -24,6 +24,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Doctor {
   id: string;
@@ -47,7 +58,6 @@ export default function Doctors() {
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
-  
   const [newDoctor, setNewDoctor] = useState<Partial<Doctor>>({
     name: "",
     specialization_id: "",
@@ -55,11 +65,10 @@ export default function Doctors() {
     bio: "",
     photo_url: ""
   });
-  
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [deleteDoctorId, setDeleteDoctorId] = useState<string | null>(null); // State untuk dialog hapus
 
-  // Fetch doctors and specializations on mount
   useEffect(() => {
     if (!user) return;
 
@@ -116,7 +125,6 @@ export default function Doctors() {
     fetchSpecializations();
   }, [user]);
 
-  // Filter doctors based on search query and department
   const filteredDoctors = doctors.filter(doctor => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDepartment = selectedDepartment === "all" || doctor.specialization_id === selectedDepartment;
@@ -133,7 +141,6 @@ export default function Doctors() {
       return;
     }
 
-    // Validasi nomor kontak
     if (newDoctor.contact && !/^\+?\d{10,15}$/.test(newDoctor.contact.replace(/\s/g, ''))) {
       toast({
         title: "Nomor Kontak Tidak Valid",
@@ -212,7 +219,6 @@ export default function Doctors() {
   const handleUpdateDoctor = async () => {
     if (!editingDoctor) return;
 
-    // Validasi nomor kontak
     if (editingDoctor.contact && !/^\+?\d{10,15}$/.test(editingDoctor.contact.replace(/\s/g, ''))) {
       toast({
         title: "Nomor Kontak Tidak Valid",
@@ -283,11 +289,13 @@ export default function Doctors() {
     }
   };
 
-  const handleDeleteDoctor = async (id: string) => {
+  const confirmDeleteDoctor = async () => {
+    if (!deleteDoctorId) return;
+
     const { error } = await supabase
       .from('doctors')
       .delete()
-      .eq('id', id);
+      .eq('id', deleteDoctorId);
 
     if (error) {
       toast({
@@ -297,12 +305,13 @@ export default function Doctors() {
       });
       console.error("Delete error:", error);
     } else {
-      setDoctors(doctors.filter(doctor => doctor.id !== id));
+      setDoctors(doctors.filter(doctor => doctor.id !== deleteDoctorId));
       toast({
         title: "Dokter Dihapus",
         description: "Dokter berhasil dihapus.",
       });
     }
+    setDeleteDoctorId(null); // Reset state setelah penghapusan
   };
 
   if (loading) return <div className="p-4">Memuat...</div>;
@@ -430,7 +439,7 @@ export default function Doctors() {
       <h2 className="text-lg font-medium mb-4">Daftar Dokter</h2>
       
       {filteredDoctors.length > 0 ? (
-        <div className="overflow-x-auto">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -558,14 +567,30 @@ export default function Doctors() {
                       </DialogContent>
                     </Dialog>
                     
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleDeleteDoctor(doctor.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash size={16} />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setDeleteDoctorId(doctor.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash size={16} />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Konfirmasi Penghapusan</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Apakah Anda yakin ingin menghapus dokter {doctor.name}? Tindakan ini tidak dapat dibatalkan.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel onClick={() => setDeleteDoctorId(null)}>Batal</AlertDialogCancel>
+                          <AlertDialogAction onClick={confirmDeleteDoctor}>Hapus</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))}

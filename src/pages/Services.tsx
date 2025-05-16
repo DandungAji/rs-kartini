@@ -57,7 +57,7 @@ export default function Services() {
               <Card 
                 key={service.id} 
                 id={service.id} 
-                className="hover:shadow-md transition-shadow cursor-pointer"
+                className="hover:shadow-xl transition-shadow cursor-pointer"
                 onClick={() => handleServiceClick(service)}
               >
                 <CardContent className="p-6">
@@ -74,8 +74,6 @@ export default function Services() {
           })}
         </div>
         
-        {/* No results message (removed since no filtering) */}
-        
         {/* Service Detail Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="sm:max-w-2xl">
@@ -90,7 +88,6 @@ export default function Services() {
                     {selectedService.name}
                   </DialogTitle>
                   <DialogDescription>
-                    {/* Category badge removed */}
                   </DialogDescription>
                 </DialogHeader>
                 

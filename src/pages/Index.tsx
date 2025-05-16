@@ -1,4 +1,4 @@
-import RollingGallery from '/Reactbits/RollingGallery/RollingGallery'
+import SplitText from '/Reactbits/SplitText/SplitText'
 import BlurText from '/Reactbits/BlurText/BlurText'
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -115,7 +115,7 @@ export default function Index() {
                     <img
                       src={partner.logo}
                       alt={`${partner.name} logo`}
-                      className="mx-auto h-16 w-16 object-contain rounded-full hover:shadow-lg transition-shadow"
+                      className="mx-auto h-16 w-16 object-contain hover:shadow-lg transition-shadow"
                     />
                     <p className="mt-2 text-sm text-muted">{partner.name}</p>
                   </div>

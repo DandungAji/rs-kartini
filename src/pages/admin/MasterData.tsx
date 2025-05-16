@@ -10,7 +10,28 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Profile {
   id: string;
@@ -38,8 +59,8 @@ export default function MasterData() {
     confirmPassword: "",
   });
   const [editingUser, setEditingUser] = useState<Profile | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  // Fetch profiles if user is admin
   useEffect(() => {
     if (!user || user.user_metadata?.role !== "admin") return;
 
@@ -73,7 +94,6 @@ export default function MasterData() {
       return;
     }
 
-    // Validasi format email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newUser.email)) {
       toast({
@@ -84,7 +104,6 @@ export default function MasterData() {
       return;
     }
 
-    // Validasi role
     if (!['admin', 'author'].includes(newUser.role)) {
       toast({
         title: "Role Tidak Valid",
@@ -95,7 +114,6 @@ export default function MasterData() {
       return;
     }
 
-    // Validasi kata sandi
     if (newUser.password.length < 8) {
       toast({
         title: "Kata Sandi Tidak Valid",
@@ -105,7 +123,6 @@ export default function MasterData() {
       return;
     }
 
-    // Validasi konfirmasi kata sandi
     if (newUser.password !== newUser.confirmPassword) {
       toast({
         title: "Konfirmasi Kata Sandi Gagal",
@@ -126,7 +143,6 @@ export default function MasterData() {
     };
     console.log("Calling create_auth_user with:", userData);
 
-    // Buat user baru di auth.users via RPC
     const { data: userId, error: authError } = await supabase
       .rpc('create_auth_user', userData);
 
@@ -142,10 +158,8 @@ export default function MasterData() {
 
     console.log("Created auth user with ID:", userId);
 
-    // Tunggu sebentar untuk memastikan trigger selesai
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Ambil data profile yang baru dibuat
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id, username, full_name, email, phone, role')
@@ -159,7 +173,6 @@ export default function MasterData() {
         variant: "destructive",
       });
       console.error("Profile fetch error:", profileError);
-      // Hapus user dari auth.users jika profile gagal
       await supabase.rpc('delete_auth_user', { user_id: userId });
       return;
     }
@@ -170,6 +183,7 @@ export default function MasterData() {
       description: `Pengguna ${profile.full_name} telah ditambahkan sebagai ${profile.role}.`,
     });
     setNewUser({ username: "", full_name: "", email: "", phone: "", role: "author", password: "", confirmPassword: "" });
+    setIsAddDialogOpen(false);
   };
 
   const handleUpdateUser = async () => {
@@ -182,7 +196,6 @@ export default function MasterData() {
       return;
     }
 
-    // Validasi format email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(editingUser.email)) {
       toast({
@@ -193,7 +206,6 @@ export default function MasterData() {
       return;
     }
 
-    // Validasi role
     if (!['admin', 'author'].includes(editingUser.role)) {
       toast({
         title: "Role Tidak Valid",
@@ -204,7 +216,6 @@ export default function MasterData() {
       return;
     }
 
-    // Validasi kata sandi jika diisi
     if (editingUser.password || editingUser.confirmPassword) {
       if (!editingUser.password || !editingUser.confirmPassword) {
         toast({
@@ -234,7 +245,6 @@ export default function MasterData() {
 
     console.log("Updating user:", editingUser);
 
-    // Perbarui profiles
     const { data, error } = await supabase
       .from('profiles')
       .update({
@@ -258,12 +268,11 @@ export default function MasterData() {
       return;
     }
 
-    // Perbarui auth.users via RPC
     const { error: authError } = await supabase
       .rpc('update_auth_user', {
         user_id: editingUser.id,
         user_email: editingUser.email,
-        user_password: editingUser.password || '', // Kirim kata sandi jika diisi
+        user_password: editingUser.password || '',
         user_metadata: {
           username: editingUser.username,
           full_name: editingUser.full_name,
@@ -290,12 +299,10 @@ export default function MasterData() {
   };
 
   const handleDeleteUser = async (id: string) => {
-    // Simpan profile untuk rollback jika perlu
     const profileToDelete = profiles.find(p => p.id === id);
 
     console.log("Deleting user with ID:", id);
 
-    // Hapus dari profiles
     const { error: profileError } = await supabase
       .from('profiles')
       .delete()
@@ -311,7 +318,6 @@ export default function MasterData() {
       return;
     }
 
-    // Panggil fungsi RPC untuk menghapus dari auth.users
     const { error: authError } = await supabase
       .rpc('delete_auth_user', { user_id: id });
 
@@ -322,7 +328,6 @@ export default function MasterData() {
         variant: "destructive",
       });
       console.error("Delete auth error:", authError);
-      // Rollback: Kembalikan profile yang dihapus
       if (profileToDelete) {
         await supabase
           .from('profiles')
@@ -346,7 +351,7 @@ export default function MasterData() {
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Master Data</h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted">
             Mengelola data dasar untuk praktik medis Anda
           </p>
         </div>
@@ -388,120 +393,115 @@ export default function MasterData() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Tambah Pengguna Baru</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          placeholder="Username"
-                          value={newUser.username || ""}
-                          onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                        />
-                        <Input
-                          placeholder="Nama Lengkap"
-                          value={newUser.full_name || ""}
-                          onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
-                        />
-                        <Input
-                          placeholder="Email"
-                          type="email"
-                          value={newUser.email || ""}
-                          onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                        />
-                        <Input
-                          placeholder="Nomor Telepon (opsional)"
-                          value={newUser.phone || ""}
-                          onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                        />
-                        <Input
-                          placeholder="Kata Sandi"
-                          type="password"
-                          value={newUser.password || ""}
-                          onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                        />
-                        <Input
-                          placeholder="Konfirmasi Kata Sandi"
-                          type="password"
-                          value={newUser.confirmPassword || ""}
-                          onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
-                        />
-                        <Select
-                          value={newUser.role}
-                          onValueChange={(value) => {
-                            console.log("Selected role:", value);
-                            setNewUser({ ...newUser, role: value as "admin" | "author" });
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih Role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="author">Author</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button onClick={handleAddUser}>Tambah Pengguna</Button>
-                    </div>
-
-                    {editingUser && (
-                      <div className="space-y-4 border-t pt-4">
-                        <h3 className="text-lg font-semibold">Edit Pengguna</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <Input
-                            placeholder="Username"
-                            value={editingUser.username || ""}
-                            onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
-                          />
-                          <Input
-                            placeholder="Nama Lengkap"
-                            value={editingUser.full_name || ""}
-                            onChange={(e) => setEditingUser({ ...editingUser, full_name: e.target.value })}
-                          />
-                          <Input
-                            placeholder="Email"
-                            type="email"
-                            value={editingUser.email || ""}
-                            onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                          />
-                          <Input
-                            placeholder="Nomor Telepon (opsional)"
-                            value={editingUser.phone || ""}
-                            onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
-                          />
-                          <Input
-                            placeholder="Kata Sandi Baru (opsional)"
-                            type="password"
-                            value={editingUser.password || ""}
-                            onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                          />
-                          <Input
-                            placeholder="Konfirmasi Kata Sandi Baru (opsional)"
-                            type="password"
-                            value={editingUser.confirmPassword || ""}
-                            onChange={(e) => setEditingUser({ ...editingUser, confirmPassword: e.target.value })}
-                          />
-                          <Select
-                            value={editingUser.role}
-                            onValueChange={(value) => {
-                              console.log("Selected edit role:", value);
-                              setEditingUser({ ...editingUser, role: value as "admin" | "author" });
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Pilih Role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="author">Author</SelectItem>
-                            </SelectContent>
-                          </Select>
+                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Tambah Pengguna
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Tambah Pengguna</DialogTitle>
+                          <DialogDescription>Isi detail pengguna baru.</DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="username" className="text-right">Username</Label>
+                            <div className="col-span-3">
+                              <Input
+                                id="username"
+                                placeholder="Username"
+                                value={newUser.username || ""}
+                                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="fullName" className="text-right">Nama Lengkap</Label>
+                            <div className="col-span-3">
+                              <Input
+                                id="fullName"
+                                placeholder="Nama Lengkap"
+                                value={newUser.full_name || ""}
+                                onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="email" className="text-right">Email</Label>
+                            <div className="col-span-3">
+                              <Input
+                                id="email"
+                                type="email"
+                                placeholder="Email"
+                                value={newUser.email || ""}
+                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="phone" className="text-right">Nomor Telepon (opsional)</Label>
+                            <div className="col-span-3">
+                              <Input
+                                id="phone"
+                                placeholder="Nomor Telepon (opsional)"
+                                value={newUser.phone || ""}
+                                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="password" className="text-right">Kata Sandi</Label>
+                            <div className="col-span-3">
+                              <Input
+                                id="password"
+                                type="password"
+                                placeholder="Kata Sandi"
+                                value={newUser.password || ""}
+                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="confirmPassword" className="text-right">Konfirmasi Kata Sandi</Label>
+                            <div className="col-span-3">
+                              <Input
+                                id="confirmPassword"
+                                type="password"
+                                placeholder="Konfirmasi Kata Sandi"
+                                value={newUser.confirmPassword || ""}
+                                onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="role" className="text-right">Role</Label>
+                            <div className="col-span-3">
+                              <Select
+                                value={newUser.role}
+                                onValueChange={(value) => {
+                                  console.log("Selected role:", value);
+                                  setNewUser({ ...newUser, role: value as "admin" | "author" });
+                                }}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Pilih Role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                  <SelectItem value="author">Author</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button onClick={handleUpdateUser}>Simpan Perubahan</Button>
-                          <Button variant="outline" onClick={() => setEditingUser(null)}>Batal</Button>
-                        </div>
-                      </div>
-                    )}
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Batal</Button>
+                          <Button onClick={handleAddUser}>Tambah Pengguna</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
 
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Daftar Pengguna</h3>
@@ -516,21 +516,138 @@ export default function MasterData() {
                                 <p className="text-sm text-gray-500">{profile.username || "Tanpa Username"} | {profile.email} | {profile.role}</p>
                               </div>
                               <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setEditingUser({ ...profile, password: "", confirmPassword: "" })}
-                                >
-                                  <Edit size={16} />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteUser(profile.id)}
-                                  className="text-red-500"
-                                >
-                                  <Trash size={16} />
-                                </Button>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setEditingUser({ ...profile, password: "", confirmPassword: "" })}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                      <DialogTitle>Edit Pengguna</DialogTitle>
+                                      <DialogDescription>Perbarui detail pengguna di bawah ini.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
+                                      <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="editUsername" className="text-right">Username</Label>
+                                        <div className="col-span-3">
+                                          <Input
+                                            id="editUsername"
+                                            placeholder="Username"
+                                            value={editingUser?.username || ""}
+                                            onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value } as Profile)}
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="editFullName" className="text-right">Nama Lengkap</Label>
+                                        <div className="col-span-3">
+                                          <Input
+                                            id="editFullName"
+                                            placeholder="Nama Lengkap"
+                                            value={editingUser?.full_name || ""}
+                                            onChange={(e) => setEditingUser({ ...editingUser, full_name: e.target.value } as Profile)}
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="editEmail" className="text-right">Email</Label>
+                                        <div className="col-span-3">
+                                          <Input
+                                            id="editEmail"
+                                            type="email"
+                                            placeholder="Email"
+                                            value={editingUser?.email || ""}
+                                            onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value } as Profile)}
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="editPhone" className="text-right">Nomor Telepon (opsional)</Label>
+                                        <div className="col-span-3">
+                                          <Input
+                                            id="editPhone"
+                                            placeholder="Nomor Telepon (opsional)"
+                                            value={editingUser?.phone || ""}
+                                            onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value } as Profile)}
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="editPassword" className="text-right">Kata Sandi Baru (opsional)</Label>
+                                        <div className="col-span-3">
+                                          <Input
+                                            id="editPassword"
+                                            type="password"
+                                            placeholder="Kata Sandi Baru (opsional)"
+                                            value={editingUser?.password || ""}
+                                            onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value } as Profile)}
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="editConfirmPassword" className="text-right">Konfirmasi Kata Sandi (opsional)</Label>
+                                        <div className="col-span-3">
+                                          <Input
+                                            id="editConfirmPassword"
+                                            type="password"
+                                            placeholder="Konfirmasi Kata Sandi (opsional)"
+                                            value={editingUser?.confirmPassword || ""}
+                                            onChange={(e) => setEditingUser({ ...editingUser, confirmPassword: e.target.value } as Profile)}
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="editRole" className="text-right">Role</Label>
+                                        <div className="col-span-3">
+                                          <Select
+                                            value={editingUser?.role || "author"}
+                                            onValueChange={(value) => setEditingUser({ ...editingUser, role: value as "admin" | "author" } as Profile)}
+                                          >
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Pilih Role" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="admin">Admin</SelectItem>
+                                              <SelectItem value="author">Author</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <DialogFooter>
+                                      <Button variant="outline" onClick={() => setEditingUser(null)}>Batal</Button>
+                                      <Button onClick={handleUpdateUser}>Simpan Perubahan</Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <Trash className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Konfirmasi Penghapusan</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Apakah Anda yakin ingin menghapus pengguna {profile.full_name || "Tanpa Nama"}? Tindakan ini tidak dapat dibatalkan.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteUser(profile.id)}>Hapus</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               </div>
                             </div>
                           ))}

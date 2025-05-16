@@ -15,6 +15,17 @@ import id from "date-fns/locale/id";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Post {
   id: string;
@@ -50,6 +61,7 @@ export default function Posts() {
   const [activeTab, setActiveTab] = useState<"all" | "published" | "draft">("all");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [deletePostId, setDeletePostId] = useState<string | null>(null); // State untuk dialog hapus
   
   const [newPost, setNewPost] = useState<Partial<Post>>({
     title: "",
@@ -60,7 +72,6 @@ export default function Posts() {
     publish_date: new Date().toISOString().split('T')[0],
   });
 
-  // Fetch posts, categories, and profiles on mount
   useEffect(() => {
     if (!user) return;
 
@@ -139,7 +150,6 @@ export default function Posts() {
     fetchPosts();
   }, [user, toast]);
 
-  // Filter posts
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (post.author?.full_name || post.author?.email || "").toLowerCase().includes(searchQuery.toLowerCase());
@@ -328,11 +338,13 @@ export default function Posts() {
     setImageFile(null);
   };
 
-  const handleDeletePost = async (id: string) => {
+  const confirmDeletePost = async () => {
+    if (!deletePostId) return;
+
     const { error } = await supabase
       .from('posts')
       .delete()
-      .eq('id', id);
+      .eq('id', deletePostId);
     
     if (error) {
       toast({
@@ -344,11 +356,12 @@ export default function Posts() {
       return;
     }
 
-    setPosts(posts.filter(post => post.id !== id));
+    setPosts(posts.filter(post => post.id !== deletePostId));
     toast({
       title: "Postingan Dihapus",
       description: "Postingan telah dihapus.",
     });
+    setDeletePostId(null); // Reset state setelah penghapusan
   };
 
   if (loading) return <div className="p-4">Memuat...</div>;
@@ -820,14 +833,30 @@ export default function Posts() {
                 >
                   <Edit size={16} />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => handleDeletePost(post.id)} 
-                  className="text-red-500 hover:text-red-600"
-                >
-                  <Trash size={16} />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setDeletePostId(post.id)}
+                      className="text-red-500 hover:text-red-600"
+                    >
+                      <Trash size={16} />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Konfirmasi Penghapusan</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Apakah Anda yakin ingin menghapus postingan "{post.title}"? Tindakan ini tidak dapat dibatalkan.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeletePostId(null)}>Batal</AlertDialogCancel>
+                      <AlertDialogAction onClick={confirmDeletePost}>Hapus</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 mb-2">

@@ -79,14 +79,23 @@ export default function DoctorSchedule() {
 
         if (specializationsError) throw new Error("Gagal mengambil data spesialisasi: " + specializationsError.message);
 
-        // Transform doctors data to include specialization name
-        const formattedDoctors: Doctor[] = doctorsData.map(doctor => ({
-          id: doctor.id,
-          name: doctor.name,
-          specialization: doctor.specializations.name,
-          photo_url: doctor.photo_url,
-          bio: doctor.bio,
-        }));
+        // Transform doctors data to include specialization name with fallback
+        const formattedDoctors: Doctor[] = doctorsData
+          .map((doctor) => {
+            const specializationName = doctor.specializations?.name || "Unknown Specialization";
+            if (!doctor.specializations) {
+              console.warn(`Doctor ${doctor.name} (ID: ${doctor.id}) has no valid specialization.`);
+            }
+            return {
+              id: doctor.id,
+              name: doctor.name,
+              specialization: specializationName,
+              photo_url: doctor.photo_url,
+              bio: doctor.bio,
+            };
+          })
+          // Optionally filter out doctors with invalid specializations
+          .filter(doctor => doctor.specialization !== "Unknown Specialization");
 
         setDoctors(formattedDoctors);
         setSchedules(schedulesData);
@@ -166,7 +175,6 @@ export default function DoctorSchedule() {
         title="Jadwal Dokter" 
         subtitle="Cari dan pesan janji temu dengan profesional medis kami"
       />
-      
       <div className="container mx-auto px-4 py-12">
         {/* Filters */}
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">

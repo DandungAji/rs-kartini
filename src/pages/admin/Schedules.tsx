@@ -33,6 +33,17 @@ import { Calendar, Clock, Edit, Filter, Search, Plus, Trash } from "lucide-react
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Doctor {
   id: string;
@@ -57,8 +68,6 @@ export default function Schedules() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState<string>("all");
   const [selectedDay, setSelectedDay] = useState<string>("all");
-  
-  // Dialog state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [newSchedule, setNewSchedule] = useState<Partial<Schedule>>({
@@ -68,8 +77,8 @@ export default function Schedules() {
     end_time: "",
     status: "active"
   });
+  const [deleteScheduleId, setDeleteScheduleId] = useState<string | null>(null); // State untuk dialog hapus
 
-  // Fetch schedules and doctors on mount
   useEffect(() => {
     if (!user) return;
 
@@ -126,7 +135,6 @@ export default function Schedules() {
     fetchDoctors();
   }, [user]);
 
-  // Filter schedules
   const filteredSchedules = schedules.filter((schedule) => {
     const doctorMatch = selectedDoctor === "all" || schedule.doctor_id === selectedDoctor;
     const dayMatch = selectedDay === "all" || schedule.days === selectedDay;
@@ -147,7 +155,6 @@ export default function Schedules() {
       return;
     }
 
-    // Validasi format waktu (HH.MM)
     const timeRegex = /^([0-1]?[0-9]|2[0-3])\.[0-5][0-9]$/;
     if (!timeRegex.test(newSchedule.start_time) || !timeRegex.test(newSchedule.end_time)) {
       toast({
@@ -210,7 +217,6 @@ export default function Schedules() {
   const handleSave = async () => {
     if (!editingSchedule) return;
 
-    // Validasi format waktu (HH.MM)
     const timeRegex = /^([0-1]?[0-9]|2[0-3])\.[0-5][0-9]$/;
     if (!timeRegex.test(editingSchedule.start_time) || !timeRegex.test(editingSchedule.end_time)) {
       toast({
@@ -260,11 +266,13 @@ export default function Schedules() {
     }
   };
 
-  const handleDeleteSchedule = async (id: string) => {
+  const confirmDeleteSchedule = async () => {
+    if (!deleteScheduleId) return;
+
     const { error } = await supabase
       .from('schedules')
       .delete()
-      .eq('id', id);
+      .eq('id', deleteScheduleId);
 
     if (error) {
       toast({
@@ -274,12 +282,13 @@ export default function Schedules() {
       });
       console.error("Delete error:", error);
     } else {
-      setSchedules(schedules.filter(s => s.id !== id));
+      setSchedules(schedules.filter(s => s.id !== deleteScheduleId));
       toast({
         title: "Jadwal Dihapus",
         description: "Jadwal berhasil dihapus.",
       });
     }
+    setDeleteScheduleId(null); // Reset state setelah penghapusan
   };
 
   const days = [
@@ -289,7 +298,6 @@ export default function Schedules() {
     "Kamis",
     "Jumat",
     "Sabtu",
-    "Minggu",
   ];
 
   if (loading) return <div className="p-4">Memuat...</div>;
@@ -543,14 +551,36 @@ export default function Schedules() {
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteSchedule(schedule.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeleteScheduleId(schedule.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Konfirmasi Penghapusan</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Apakah Anda yakin ingin menghapus jadwal dokter untuk{" "}
+                            {schedule.doctor?.name || "Dokter Tidak Diketahui"} pada{" "}
+                            {schedule.days} ({schedule.start_time} - {schedule.end_time})? Tindakan ini tidak dapat dibatalkan.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel onClick={() => setDeleteScheduleId(null)}>
+                            Batal
+                          </AlertDialogCancel>
+                          <AlertDialogAction onClick={confirmDeleteSchedule}>
+                            Hapus
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))

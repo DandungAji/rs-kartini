@@ -27,6 +27,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       console.log("Attempting logout");
       await signOut();
       console.log("Logout successful");
+      navigate("/admin/login");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -36,43 +37,44 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { 
       name: "Dashboard", 
       path: "/admin", 
-      icon: <List className="mr-2 h-5 w-5" /> 
+      icon: <List className="mr-2 h-5 w-5 text-primary" /> 
     },
     { 
-      name: "Doctors", 
+      name: "Dokter", 
       path: "/admin/doctors", 
-      icon: <Users className="mr-2 h-5 w-5" /> 
+      icon: <Users className="mr-2 h-5 w-5 text-primary" /> 
     },
     { 
-      name: "Doctor Schedules", 
+      name: "Jadwal Dokter", 
       path: "/admin/schedules", 
-      icon: <Calendar className="mr-2 h-5 w-5" /> 
+      icon: <Calendar className="mr-2 h-5 w-5 text-primary" /> 
     },
     { 
-      name: "Posts", 
+      name: "Postingan", 
       path: "/admin/posts", 
-      icon: <File className="mr-2 h-5 w-5" /> 
+      icon: <File className="mr-2 h-5 w-5 text-primary" /> 
     },
     { 
       name: "Master Data", 
       path: "/admin/master-data", 
-      icon: <Database className="mr-2 h-5 w-5" /> 
+      icon: <Database className="mr-2 h-5 w-5 text-primary" /> 
     },
     { 
-      name: "Profile", 
+      name: "Profil", 
       path: "/admin/profile", 
-      icon: <User className="mr-2 h-5 w-5" /> 
+      icon: <User className="mr-2 h-5 w-5 text-primary" /> 
     },
   ];
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-secondary">
       {/* Mobile sidebar toggle */}
       <div className="block md:hidden absolute top-4 left-4 z-50">
         <Button
           variant="outline"
           size="icon"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="border-primary text-primary hover:bg-primary/10"
         >
           {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </Button>
@@ -84,20 +86,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
-        <div className="p-6">
+        <div className="p-6 border-primary">
           <Link to="/" className="flex items-center">
             <img src="/images/logo.png" alt="RS Kartini" className="h-12 mr-2" />
           </Link>
         </div>
         
-        <div className="px-4 pb-6 border-b">
-          <div className="text-sm font-medium text-gray-500">
-            Logged in as
+        <div className="px-4 py-6 border-b border-primary">
+          <div className="text-sm font-medium text-muted">
+            Masuk sebagai
           </div>
-          <div className="font-medium">
+          <div className="font-medium text-foreground">
             {loading ? "Loading..." : (user?.user_metadata?.full_name || user?.email || "Unknown")}
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-muted">
             {loading ? "Loading..." : (user?.user_metadata?.role || "Unknown")}
           </div>
         </div>
@@ -108,8 +110,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center px-4 py-3 text-gray-700 rounded-md hover:bg-gray-100 transition-colors ${
-                    location.pathname === item.path ? "bg-blue-50 text-primary font-medium" : ""
+                  className={`flex items-center px-4 py-3 text-foreground rounded-md hover:bg-primary/10 transition-colors ${
+                    location.pathname === item.path ? "bg-primary/20 font-medium" : ""
                   }`}
                   onClick={() => {
                     if (window.innerWidth < 768) {
@@ -127,9 +129,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Button
                 variant="ghost"
                 onClick={handleLogout}
-                className="w-full justify-start text-gray-700 hover:text-red-600 hover:bg-red-50"
+                className="w-full justify-start text-foreground hover:text-destructive hover:bg-destructive/10"
               >
-                <LogOut className="mr-2 h-5 w-5" />
+                <LogOut className="mr-2 h-5 w-5 text-destructive" />
                 <span>Logout</span>
               </Button>
             </li>
@@ -139,13 +141,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm h-16 flex items-center justify-end px-6">
-          <Link to="/" className="text-gray-600 hover:text-primary text-sm">
+        <header className="bg-white shadow-sm h-16 flex items-center justify-end px-6 border-b border-primary">
+          <Link to="/" className="text-muted hover:text-primary text-sm">
             Lihat Website
           </Link>
         </header>
         
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary p-6">
           {children}
         </main>
       </div>
