@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,11 +25,24 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/lib/supabase";
-import { Calendar, Clock, Edit, Filter, Search, Plus, Trash } from "lucide-react";
+import { Calendar, Clock, Edit, Filter, Search, Plus, Trash, Check, ChevronsUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,6 +57,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 interface Doctor {
   id: string;
@@ -77,7 +91,10 @@ export default function Schedules() {
     end_time: "",
     status: "active"
   });
-  const [deleteScheduleId, setDeleteScheduleId] = useState<string | null>(null); // State untuk dialog hapus
+  const [deleteScheduleId, setDeleteScheduleId] = useState<string | null>(null);
+  // State for Combobox open/close
+  const [doctorComboboxOpen, setDoctorComboboxOpen] = useState(false);
+  const [dayComboboxOpen, setDayComboboxOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -209,10 +226,10 @@ export default function Schedules() {
     }
   };
 
-  const handleEdit = (schedule: Schedule) => {
+  const handleEdit = useCallback((schedule: Schedule) => {
     setEditingSchedule({ ...schedule });
     setIsDialogOpen(true);
-  };
+  }, []);
 
   const handleSave = async () => {
     if (!editingSchedule) return;
@@ -288,7 +305,7 @@ export default function Schedules() {
         description: "Jadwal berhasil dihapus.",
       });
     }
-    setDeleteScheduleId(null); // Reset state setelah penghapusan
+    setDeleteScheduleId(null);
   };
 
   const days = [
@@ -356,7 +373,14 @@ export default function Schedules() {
 
       {/* Add Schedule Button */}
       <div className="mb-6">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setDoctorComboboxOpen(false);
+            setDayComboboxOpen(false);
+            setEditingSchedule(null);
+          }
+        }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -364,142 +388,144 @@ export default function Schedules() {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>{editingSchedule ? "Edit Jadwal" : "Tambah Jadwal"}</DialogTitle>
-              <DialogDescription>
-                {editingSchedule ? "Perbarui detail jadwal di bawah ini." : "Isi detail jadwal baru."}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="doctor" className="text-right">
-                  Dokter
-                </Label>
-                <div className="col-span-3">
-                  <Select
-                    value={editingSchedule ? editingSchedule.doctor_id : newSchedule.doctor_id}
-                    onValueChange={(value) =>
-                      editingSchedule
-                        ? setEditingSchedule(prev => prev ? { ...prev, doctor_id: value } : null)
-                        : setNewSchedule({ ...newSchedule, doctor_id: value })
-                    }
-                    disabled={doctors.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={doctors.length === 0 ? "Tidak ada dokter" : "Pilih dokter"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {doctors.map((doctor) => (
-                        <SelectItem key={doctor.id} value={doctor.id}>
-                          {doctor.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="day" className="text-right">
-                  Hari
-                </Label>
-                <div className="col-span-3">
-                  <Select
-                    value={editingSchedule ? editingSchedule.days : newSchedule.days}
-                    onValueChange={(value) =>
-                      editingSchedule
-                        ? setEditingSchedule(prev => prev ? { ...prev, days: value } : null)
-                        : setNewSchedule({ ...newSchedule, days: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih hari" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {days.map((day) => (
-                        <SelectItem key={day} value={day}>
-                          {day}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="startTime" className="text-right">
-                  Waktu Mulai
-                </Label>
-                <div className="col-span-3">
-                  <Input
-                    id="startTime"
-                    placeholder="08.00"
-                    value={editingSchedule ? editingSchedule.start_time : newSchedule.start_time}
-                    onChange={(e) =>
-                      editingSchedule
-                        ? setEditingSchedule(prev => prev ? { ...prev, start_time: e.target.value } : null)
-                        : setNewSchedule({ ...newSchedule, start_time: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="endTime" className="text-right">
-                  Waktu Selesai
-                </Label>
-                <div className="col-span-3">
-                  <Input
-                    id="endTime"
-                    placeholder="12.00"
-                    value={editingSchedule ? editingSchedule.end_time : newSchedule.end_time}
-                    onChange={(e) =>
-                      editingSchedule
-                        ? setEditingSchedule(prev => prev ? { ...prev, end_time: e.target.value } : null)
-                        : setNewSchedule({ ...newSchedule, end_time: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="status" className="text-right">
-                  Status
-                </Label>
-                <div className="col-span-3 flex items-center space-x-2">
-                  <Switch
-                    id="status"
-                    checked={editingSchedule ? editingSchedule.status === "active" : newSchedule.status === "active"}
-                    onCheckedChange={(checked) =>
-                      editingSchedule
-                        ? setEditingSchedule(prev => 
-                            prev ? { ...prev, status: checked ? "active" : "inactive" } : null
-                          )
-                        : setNewSchedule({ ...newSchedule, status: checked ? "active" : "inactive" })
-                    }
-                  />
-                  <span>
-                    {editingSchedule
-                      ? editingSchedule.status === "active" ? "Aktif" : "Tidak Aktif"
-                      : newSchedule.status === "active" ? "Aktif" : "Tidak Aktif"}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setIsDialogOpen(false);
-                setEditingSchedule(null);
-              }}>
-                Batal
-              </Button>
-              <Button onClick={editingSchedule ? handleSave : handleAddSchedule}>
-                {editingSchedule ? "Simpan Perubahan" : "Tambah Jadwal"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
+  <DialogHeader>
+    <DialogTitle>{editingSchedule ? "Edit Jadwal" : "Tambah Jadwal"}</DialogTitle>
+    <DialogDescription>
+      {editingSchedule ? "Perbarui detail jadwal di bawah ini." : "Isi detail jadwal baru."}
+    </DialogDescription>
+  </DialogHeader>
+  
+  <div className="grid gap-4 py-4">
+    <div className="grid grid-cols-4 items-center gap-4">
+      <Label htmlFor="doctor" className="text-right">
+        Dokter
+      </Label>
+      <div className="col-span-3">
+        <Select
+          value={editingSchedule ? editingSchedule.doctor_id : newSchedule.doctor_id}
+          onValueChange={(value) =>
+            editingSchedule
+              ? setEditingSchedule((prev) => (prev ? { ...prev, doctor_id: value } : null))
+              : setNewSchedule((prev) => ({ ...prev, doctor_id: value }))
+          }
+        >
+          <SelectTrigger id="doctor">
+            <SelectValue placeholder="Pilih Dokter" />
+          </SelectTrigger>
+          <SelectContent>
+            {doctors.map((doctor) => (
+              <SelectItem key={doctor.id} value={doctor.id}>
+                {doctor.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+    
+    <div className="grid grid-cols-4 items-center gap-4">
+      <Label htmlFor="day" className="text-right">
+        Hari
+      </Label>
+      <div className="col-span-3">
+        <Select
+          value={editingSchedule ? editingSchedule.days : newSchedule.days}
+          onValueChange={(value) =>
+            editingSchedule
+              ? setEditingSchedule((prev) => (prev ? { ...prev, days: value } : null))
+              : setNewSchedule((prev) => ({ ...prev, days: value }))
+          }
+        >
+          <SelectTrigger id="day">
+            <SelectValue placeholder="Pilih hari" />
+          </SelectTrigger>
+          <SelectContent>
+            {days.map((day) => (
+              <SelectItem key={day} value={day}>
+                {day}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+    
+    <div className="grid grid-cols-4 items-center gap-4">
+      <Label htmlFor="startTime" className="text-right">
+        Waktu Mulai
+      </Label>
+      <div className="col-span-3">
+        <Input
+          id="startTime"
+          placeholder="08.00"
+          value={editingSchedule ? editingSchedule.start_time : newSchedule.start_time}
+          onChange={(e) =>
+            editingSchedule
+              ? setEditingSchedule((prev) => (prev ? { ...prev, start_time: e.target.value } : null))
+              : setNewSchedule({ ...newSchedule, start_time: e.target.value })
+          }
+        />
+      </div>
+    </div>
+    
+    <div className="grid grid-cols-4 items-center gap-4">
+      <Label htmlFor="endTime" className="text-right">
+        Waktu Selesai
+      </Label>
+      <div className="col-span-3">
+        <Input
+          id="endTime"
+          placeholder="12.00"
+          value={editingSchedule ? editingSchedule.end_time : newSchedule.end_time}
+          onChange={(e) =>
+            editingSchedule
+              ? setEditingSchedule((prev) => (prev ? { ...prev, end_time: e.target.value } : null))
+              : setNewSchedule({ ...newSchedule, end_time: e.target.value })
+          }
+        />
+      </div>
+    </div>
+    
+    <div className="grid grid-cols-4 items-center gap-4">
+      <Label htmlFor="status" className="text-right">
+        Status
+      </Label>
+      <div className="col-span-3 flex items-center space-x-2">
+        <Switch
+          id="status"
+          checked={editingSchedule ? editingSchedule.status === "active" : newSchedule.status === "active"}
+          onCheckedChange={(checked) =>
+            editingSchedule
+              ? setEditingSchedule((prev) =>
+                  prev ? { ...prev, status: checked ? "active" : "inactive" } : null
+                )
+              : setNewSchedule({ ...newSchedule, status: checked ? "active" : "inactive" })
+          }
+        />
+        <span>
+          {editingSchedule
+            ? editingSchedule.status === "active" ? "Aktif" : "Tidak Aktif"
+            : newSchedule.status === "active" ? "Aktif" : "Tidak Aktif"}
+        </span>
+      </div>
+    </div>
+  </div>
+  
+  <DialogFooter>
+    <Button
+      variant="outline"
+      onClick={() => {
+        setIsDialogOpen(false);
+        setEditingSchedule(null);
+      }}
+    >
+      Batal
+    </Button>
+    <Button onClick={editingSchedule ? handleSave : handleAddSchedule}>
+      {editingSchedule ? "Simpan Perubahan" : "Tambah Jadwal"}
+    </Button>
+  </DialogFooter>
+</DialogContent>
         </Dialog>
       </div>
 
