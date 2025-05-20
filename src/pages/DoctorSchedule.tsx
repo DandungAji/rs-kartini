@@ -16,13 +16,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Calendar, Clock } from "lucide-react";
 import AnimatedSection from "@/components/AnimatedSection";
@@ -202,65 +201,51 @@ export default function DoctorSchedule() {
           <AnimatedSection animationStyle="fade-in" className="space-y-8">
             {Object.entries(schedulesByDay).map(([day, daySchedules]) => 
               daySchedules.length > 0 && (
-                <div key={day} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="bg-primary text-white p-4">
-                    <h3 className="text-xl font-semibold flex items-center">
+                <Card key={day} className="overflow-hidden">
+                  <CardHeader className="bg-primary text-white">
+                    <CardTitle className="flex items-center">
                       <Calendar className="mr-2 h-5 w-5" />
                       {day}
-                    </h3>
-                  </div>
+                    </CardTitle>
+                  </CardHeader>
                   
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[250px]">Dokter</TableHead>
-                          <TableHead>Spesialisasi</TableHead>
-                          <TableHead>Waktu</TableHead>
-                          <TableHead className="text-right">Reservasi</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {daySchedules.map((schedule) => (
-                          <TableRow key={schedule.id}>
-                            <TableCell className="font-medium">
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {daySchedules.map((schedule) => (
+                        <Card key={schedule.id} className="overflow-hidden">
+                          <CardContent className="p-4">
+                            <div className="font-medium text-lg mb-1">
                               {schedule.doctor?.name || "Dokter Tidak Diketahui"}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="bg-secondary/50">
-                                {schedule.doctor?.specialization?.name || "Umum"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center">
-                                <Clock className="h-4 w-4 mr-2 text-primary" />
-                                <span>
-                                  {schedule.start_time} - {schedule.end_time}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button size="sm" className="hover-scale">
-                                Buat Janji
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
+                            </div>
+                            <Badge variant="outline" className="mb-3 bg-secondary/50">
+                              {schedule.doctor?.specialization?.name || "Umum"}
+                            </Badge>
+                            <div className="flex items-center text-sm text-muted-foreground mb-4">
+                              <Clock className="h-4 w-4 mr-2 text-primary" />
+                              <span>
+                                {schedule.start_time} - {schedule.end_time}
+                              </span>
+                            </div>
+                            <Button size="sm" className="hover-scale w-full">
+                              Buat Janji
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               )
             )}
             
             {filteredSchedules.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-lg shadow-md">
+              <Card className="p-12 text-center">
                 <div className="text-muted-foreground">
                   <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
                   <p className="text-lg">Tidak ada jadwal dokter yang ditemukan</p>
                   <p className="mt-2">Silakan coba dengan filter yang berbeda</p>
                 </div>
-              </div>
+              </Card>
             )}
           </AnimatedSection>
         )}
