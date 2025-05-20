@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/lib/supabase";
-import { Calendar, Clock, Edit, Filter, Search, Plus, Trash, Check, ChevronsUpDown } from "lucide-react";
+import { Calendar, Edit, Search, Plus, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,14 +46,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { Editor } from "@tiptap/react";
-import { useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { EditorContent } from "@tiptap/react";
-import { Underline } from "@tiptap/extension-underline";
-import { Link } from "@tiptap/extension-link";
-import { Image } from "@tiptap/extension-image";
 import { Post, ensureObject } from "@/lib/types";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface Category {
   id: string;
@@ -85,24 +81,8 @@ export default function Posts() {
     author: { id: "", full_name: "", email: "" },
     category: { id: "", name: "" }
   });
-  const [deletePostId, setDeletePostId] = useState<string | null>(null);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      Link,
-      Image,
-    ],
-    content: editingPost?.content || newPost.content || '',
-    onUpdate: ({ editor }) => {
-      if (editingPost) {
-        setEditingPost((prev) => (prev ? { ...prev, content: editor.getHTML() } : null));
-      } else {
-        setNewPost({ ...newPost, content: editor.getHTML() });
-      }
-    },
-  });
+  const [deletePostId, setDeletePostId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -159,7 +139,14 @@ export default function Posts() {
       } else {
         setUsers(data);
         if (data.length > 0) {
-          setNewPost(prev => ({ ...prev, author: { id: data[0].id, full_name: data[0].full_name, email: data[0].email } }));
+          setNewPost(prev => ({
+            ...prev,
+            author: {
+              id: data[0].id,
+              full_name: data[0].full_name,
+              email: data[0].email
+            }
+          }));
         }
         console.log("Users fetched:", data);
       }
@@ -180,7 +167,13 @@ export default function Posts() {
       } else {
         setCategories(data);
         if (data.length > 0) {
-          setNewPost(prev => ({ ...prev, category: { id: data[0].id, name: data[0].name } }));
+          setNewPost(prev => ({
+            ...prev,
+            category: {
+              id: data[0].id,
+              name: data[0].name
+            }
+          }));
         }
         console.log("Categories fetched:", data);
       }
@@ -255,7 +248,7 @@ export default function Posts() {
         author: ensureObject(data.author),
         category: ensureObject(data.category)
       };
-      setPosts([...posts, newPostData]);
+      setPosts([...posts, newPostData as Post]);
       toast({
         title: "Posting Ditambahkan",
         description: "Posting berhasil ditambahkan.",
@@ -271,17 +264,11 @@ export default function Posts() {
         category: { id: categories[0]?.id || "", name: categories[0]?.name || "" }
       });
       setIsDialogOpen(false);
-      if (editor) {
-        editor.commands.clearContent();
-      }
     }
   };
 
   const handleEdit = (post: Post) => {
     setEditingPost({ ...post });
-    if (editor) {
-      editor.commands.setContent(post.content);
-    }
     setIsDialogOpen(true);
   };
 
@@ -334,7 +321,7 @@ export default function Posts() {
         author: ensureObject(data.author),
         category: ensureObject(data.category)
       };
-      setPosts(posts.map(p => p.id === data.id ? updatedPost : p));
+      setPosts(posts.map(p => p.id === data.id ? updatedPost as Post : p));
       toast({
         title: "Posting Diperbarui",
         description: "Posting berhasil diperbarui.",
@@ -413,9 +400,6 @@ export default function Posts() {
           setIsDialogOpen(open);
           if (!open) {
             setEditingPost(null);
-            if (editor) {
-              editor.commands.clearContent();
-            }
           }
         }}>
           <DialogTrigger asChild>
@@ -424,7 +408,7 @@ export default function Posts() {
               Tambah Artikel
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[700px]">
+          <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingPost ? "Edit Artikel" : "Tambah Artikel"}</DialogTitle>
               <DialogDescription>
@@ -456,9 +440,16 @@ export default function Posts() {
                   Konten
                 </Label>
                 <div className="col-span-3">
-                  {editor && (
-                    <EditorContent editor={editor} />
-                  )}
+                  <ReactQuill
+                    theme="snow"
+                    value={editingPost ? editingPost.content : newPost.content}
+                    onChange={(content) =>
+                      editingPost
+                        ? setEditingPost((prev) => (prev ? { ...prev, content } : null))
+                        : setNewPost({ ...newPost, content })
+                    }
+                    className="h-[200px] mb-12"
+                  />
                 </div>
               </div>
               
@@ -505,11 +496,27 @@ export default function Posts() {
                 <div className="col-span-3">
                   <Select
                     value={editingPost ? editingPost.category.id : newPost.category?.id}
-                    onValueChange={(value) =>
-                      editingPost
-                        ? setEditingPost((prev) => (prev ? { ...prev, category: { ...prev.category, id: value } } : null))
-                        : setNewPost({ ...newPost, category: { ...newPost.category, id: value } })
-                    }
+                    onValueChange={(value) => {
+                      const selectedCategory = categories.find(cat => cat.id === value) || { id: value, name: "" };
+                      
+                      if (editingPost) {
+                        setEditingPost((prev) => (prev ? { 
+                          ...prev, 
+                          category: { 
+                            id: selectedCategory.id, 
+                            name: selectedCategory.name 
+                          } 
+                        } : null));
+                      } else {
+                        setNewPost({ 
+                          ...newPost, 
+                          category: { 
+                            id: selectedCategory.id, 
+                            name: selectedCategory.name 
+                          } 
+                        });
+                      }
+                    }}
                   >
                     <SelectTrigger id="category">
                       <SelectValue placeholder="Pilih Kategori" />
@@ -532,11 +539,29 @@ export default function Posts() {
                 <div className="col-span-3">
                   <Select
                     value={editingPost ? editingPost.author.id : newPost.author?.id}
-                    onValueChange={(value) =>
-                      editingPost
-                        ? setEditingPost((prev) => (prev ? { ...prev, author: { ...prev.author, id: value } } : null))
-                        : setNewPost({ ...newPost, author: { ...newPost.author, id: value } })
-                    }
+                    onValueChange={(value) => {
+                      const selectedUser = users.find(u => u.id === value) || { id: value, full_name: "", email: "" };
+                      
+                      if (editingPost) {
+                        setEditingPost((prev) => (prev ? { 
+                          ...prev, 
+                          author: { 
+                            id: selectedUser.id, 
+                            full_name: selectedUser.full_name,
+                            email: selectedUser.email
+                          } 
+                        } : null));
+                      } else {
+                        setNewPost({ 
+                          ...newPost, 
+                          author: { 
+                            id: selectedUser.id, 
+                            full_name: selectedUser.full_name,
+                            email: selectedUser.email
+                          } 
+                        });
+                      }
+                    }}
                   >
                     <SelectTrigger id="author">
                       <SelectValue placeholder="Pilih Penulis" />
@@ -601,9 +626,6 @@ export default function Posts() {
                 onClick={() => {
                   setIsDialogOpen(false);
                   setEditingPost(null);
-                  if (editor) {
-                    editor.commands.clearContent();
-                  }
                 }}
               >
                 Batal
@@ -645,11 +667,11 @@ export default function Posts() {
                   <TableCell className="text-center">
                     <Badge
                       variant={post.status === "published" ? "default" : "outline"}
-                      className={
+                      className={cn(
                         post.status === "published"
                           ? "bg-green-100 text-green-800 hover:bg-green-100"
                           : "bg-gray-100 text-gray-800 hover:bg-gray-100"
-                      }
+                      )}
                     >
                       {post.status === "published" ? "Published" : "Draft"}
                     </Badge>

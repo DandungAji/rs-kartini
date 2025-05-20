@@ -1,10 +1,12 @@
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -58,9 +60,9 @@ export default function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
+              <Label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
                 Username atau Email
-              </label>
+              </Label>
               <Input
                 id="identifier"
                 name="identifier"
@@ -73,9 +75,9 @@ export default function Login() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Kata Sandi
-              </label>
+              </Label>
               <Input
                 id="password"
                 name="password"

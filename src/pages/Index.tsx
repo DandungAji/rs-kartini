@@ -20,8 +20,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import SplitText from '/Reactbits/SplitText/SplitText'
-import BlurText from '/Reactbits/BlurText/BlurText'
+import SpecialtiesSection from '@/components/SpecialtiesSection';
+import { CalendarCheck, Award, Heart, Phone, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function Index() {
   // Featured services for the homepage
