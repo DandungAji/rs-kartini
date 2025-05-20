@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,6 +9,8 @@ import { Service } from "@/lib/types";
 import * as LucideIcons from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check } from "lucide-react";
+import Parallax from "@/components/Parallax";
+import AnimatedSection from "@/components/AnimatedSection";
 
 export default function Services() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -39,17 +42,25 @@ export default function Services() {
   };
 
   return (
-    <>
+    <div className="overflow-x-hidden">
       <Navbar />
       
-      <PageHeader 
-        title="Layanan Kami" 
-        subtitle="Layanan kesehatan yang komprehensif untuk semua kebutuhan medis Anda"
-      />
+      <div className="relative">
+        <Parallax speed={0.4} className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-blue-500/90 z-10"></div>
+          <div className="bg-[url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0"></div>
+        </Parallax>
+        
+        <PageHeader 
+          title="Layanan Kami" 
+          subtitle="Layanan kesehatan yang komprehensif untuk semua kebutuhan medis Anda"
+          className="relative z-10 bg-transparent"
+        />
+      </div>
       
       <div className="container mx-auto px-4 py-12">
         {/* Services List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnimatedSection animationStyle="stagger-children" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service: Service) => {
             const Icon = getServiceIcon(service);
             
@@ -57,7 +68,7 @@ export default function Services() {
               <Card 
                 key={service.id} 
                 id={service.id} 
-                className="hover:shadow-xl transition-shadow cursor-pointer"
+                className="hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2 hover:shadow-primary/20"
                 onClick={() => handleServiceClick(service)}
               >
                 <CardContent className="p-6">
@@ -72,7 +83,7 @@ export default function Services() {
               </Card>
             );
           })}
-        </div>
+        </AnimatedSection>
         
         {/* Service Detail Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -135,30 +146,37 @@ export default function Services() {
         </Dialog>
         
         {/* Additional Info */}
-        <div className="mt-16 bg-primary rounded-lg p-8">
-          <h2 className="text-2xl text-muted-foreground font-bold mb-4">Butuh Perawatan Khusus?</h2>
-          <p className="text-secondary mb-4">
-            Rumah sakit kami menawarkan berbagai layanan medis. 
-            Jika Anda memiliki kebutuhan perawatan kesehatan khusus atau pertanyaan, silakan hubungi tim medis kami untuk mendapatkan bantuan khusus.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <div className="bg-white p-6 rounded-md shadow-sm">
-              <h3 className="text-lg font-semibold mb-2">Layanan Darurat</h3>
-              <p className="text-gray-600">
-                Perawatan darurat 24/7 untuk situasi medis yang mendesak. Hubungi 0851-7964-8841 untuk bantuan segera.
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-md shadow-sm">
-              <h3 className="text-lg font-semibold mb-2">Penjadwalan Janji Temu</h3>
-              <p className="text-gray-600">
-                Jadwalkan janji temu rutin melalui portal online kami atau dengan menghubungi resepsionis kami di 0878-1988-1010.
-              </p>
+        <AnimatedSection animationStyle="fade-in" className="mt-16 bg-primary rounded-lg p-8 relative overflow-hidden">
+          <Parallax speed={0.1} className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-blue-500 opacity-30"></div>
+            <div className="bg-[url('https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0 mix-blend-overlay"></div>
+          </Parallax>
+          
+          <div className="relative z-10">
+            <h2 className="text-2xl text-white font-bold mb-4">Butuh Perawatan Khusus?</h2>
+            <p className="text-white/90 mb-4">
+              Rumah sakit kami menawarkan berbagai layanan medis. 
+              Jika Anda memiliki kebutuhan perawatan kesehatan khusus atau pertanyaan, silakan hubungi tim medis kami untuk mendapatkan bantuan khusus.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <div className="bg-white p-6 rounded-md shadow-sm hover-lift">
+                <h3 className="text-lg font-semibold mb-2">Layanan Darurat</h3>
+                <p className="text-gray-600">
+                  Perawatan darurat 24/7 untuk situasi medis yang mendesak. Hubungi 0851-7964-8841 untuk bantuan segera.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-md shadow-sm hover-lift">
+                <h3 className="text-lg font-semibold mb-2">Penjadwalan Janji Temu</h3>
+                <p className="text-gray-600">
+                  Jadwalkan janji temu rutin melalui portal online kami atau dengan menghubungi resepsionis kami di 0878-1988-1010.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </AnimatedSection>
       </div>
       
       <Footer />
-    </>
+    </div>
   );
 }

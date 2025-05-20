@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -9,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin, Phone } from "lucide-react";
 import emailjs from "@emailjs/browser";
+import Parallax from "@/components/Parallax";
+import AnimatedSection from "@/components/AnimatedSection";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -72,22 +75,30 @@ export default function Contact() {
   };
 
   return (
-    <>
+    <div className="overflow-x-hidden">
       <Navbar />
       
-      <PageHeader 
-        title="Kontak Kami" 
-        subtitle="Hubungi tim kami untuk pertanyaan dan janji temu"
-      />
+      <div className="relative">
+        <Parallax speed={0.4} className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-blue-500/90 z-10"></div>
+          <div className="bg-[url('https://images.unsplash.com/photo-1587351021759-3e566b3db3f2?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0"></div>
+        </Parallax>
+        
+        <PageHeader 
+          title="Kontak Kami" 
+          subtitle="Hubungi tim kami untuk pertanyaan dan janji temu"
+          className="relative z-10 bg-transparent"
+        />
+      </div>
       
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Info */}
-          <div className="lg:col-span-1">
+          <AnimatedSection animationStyle="slide-up" className="lg:col-span-1">
             <h2 className="text-2xl font-bold mb-6">Informasi Kontak</h2>
             
             <div className="space-y-6">
-              <div className="flex">
+              <div className="flex p-4 bg-secondary rounded-lg hover-lift">
                 <Phone className="h-6 w-6 text-primary mr-3 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold mb-1">Telepon</h3>
@@ -96,7 +107,7 @@ export default function Contact() {
                 </div>
               </div>
               
-              <div className="flex">
+              <div className="flex p-4 bg-secondary rounded-lg hover-lift">
                 <Mail className="h-6 w-6 text-primary mr-3 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold mb-1">Email</h3>
@@ -104,7 +115,7 @@ export default function Contact() {
                 </div>
               </div>
               
-              <div className="flex">
+              <div className="flex p-4 bg-secondary rounded-lg hover-lift">
                 <MapPin className="h-6 w-6 text-primary mr-3 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold mb-1">Lokasi</h3>
@@ -117,7 +128,7 @@ export default function Contact() {
             
             <div className="mt-8">
               <h2 className="text-2xl font-bold mb-4">Jam Operasional</h2>
-              <div className="space-y-2">
+              <div className="space-y-2 p-4 bg-secondary rounded-lg hover-lift">
                 <div className="flex justify-between">
                   <span>Poliklinik:</span>
                   <span className="text-primary"><Link to="/doctor-schedule">Lihat Jadwal</Link></span>
@@ -128,104 +139,109 @@ export default function Contact() {
                 </div>
               </div>
             </div>
-          </div>
+          </AnimatedSection>
           
           {/* Contact Form */}
-          <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold mb-6">Kirim Pesan</h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="block text-sm font-medium">
-                    Nama Anda
-                  </label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    required
-                    className="placeholder:text-gray-400"
-                  />
+          <AnimatedSection animationStyle="slide-up" delay={200} className="lg:col-span-2">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold mb-6">Kirim Pesan</h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="block text-sm font-medium">
+                      Nama Anda
+                    </label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                      required
+                      className="placeholder:text-gray-400 hover-glow focus:hover-glow"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="block text-sm font-medium">
+                      Alamat Email
+                    </label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="guest@example.com"
+                      required
+                      className="placeholder:text-gray-400 hover-glow focus:hover-glow"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="block text-sm font-medium">
+                      Nomor Telepon
+                    </label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="(555) 123-4567"
+                      className="placeholder:text-gray-400 hover-glow focus:hover-glow"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="subject" className="block text-sm font-medium">
+                      Subjek
+                    </label>
+                    <Input
+                      id="subject"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      placeholder="Permintaan untuk janji temu"
+                      required
+                      className="placeholder:text-gray-400 hover-glow focus:hover-glow"
+                    />
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm font-medium">
-                    Alamat Email
+                  <label htmlFor="message" className="block text-sm font-medium">
+                    Pesan Anda
                   </label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
+                  <Textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
                     onChange={handleChange}
-                    placeholder="guest@example.com"
+                    placeholder="Jelaskan kebutuhan anda..."
+                    rows={6}
                     required
-                    className="placeholder:text-gray-400"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="phone" className="block text-sm font-medium">
-                    Nomor Telepon
-                  </label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="(555) 123-4567"
-                    className="placeholder:text-gray-400"
+                    className="placeholder:text-gray-400 hover-glow focus:hover-glow"
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <label htmlFor="subject" className="block text-sm font-medium">
-                    Subjek
-                  </label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    placeholder="Permintaan untuk janji temu"
-                    required
-                    className="placeholder:text-gray-400"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="message" className="block text-sm font-medium">
-                  Pesan Anda
-                </label>
-                <Textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="Jelaskan kebutuhan anda..."
-                  rows={6}
-                  required
-                  className="placeholder:text-gray-400"
-                />
-              </div>
-              
-              <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">
-                {isSubmitting ? "Mengirim..." : "Kirim Pesan"}
-              </Button>
-            </form>
-          </div>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting} 
+                  className="w-full md:w-auto hover-scale">
+                  {isSubmitting ? "Mengirim..." : "Kirim Pesan"}
+                </Button>
+              </form>
+            </div>
+          </AnimatedSection>
         </div>
         
         {/* Google Maps */}
-        <div className="mt-16">
+        <AnimatedSection animationStyle="fade-in" delay={400} className="mt-16">
           <h2 className="text-2xl font-bold mb-6">Lokasi</h2>
-          <div className="h-[400px] bg-gray-200 rounded-lg overflow-hidden">
+          <div className="h-[400px] bg-gray-200 rounded-lg overflow-hidden shadow-md hover-lift">
             <iframe
               src="https://maps.google.com/maps?width=600&height=400&hl=en&q=rs%20kartini%20bandung&t=&z=14&ie=UTF8&iwloc=B&output=embed"
               width="100%"
@@ -237,10 +253,10 @@ export default function Contact() {
               title="Hospital Location"
             ></iframe>
           </div>
-        </div>
+        </AnimatedSection>
       </div>
       
       <Footer />
-    </>
+    </div>
   );
 }

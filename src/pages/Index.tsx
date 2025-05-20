@@ -1,3 +1,4 @@
+
 import SplitText from '/Reactbits/SplitText/SplitText'
 import BlurText from '/Reactbits/BlurText/BlurText'
 import { Link } from "react-router-dom";
@@ -6,6 +7,8 @@ import { services } from "@/lib/mockData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Activity, Stethoscope, Siren, Bed, Microscope, Scan, Pill } from "lucide-react";
+import Parallax from "@/components/Parallax";
+import AnimatedSection from "@/components/AnimatedSection";
 import {
   Accordion,
   AccordionContent,
@@ -65,12 +68,17 @@ export default function Index() {
   };
 
   return (
-    <>
+    <div className="overflow-x-hidden">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="hero py-16 md:py-24 bg-hero-gradient">
-        <div className="container mx-auto px-4">
+      {/* Hero Section with Parallax */}
+      <section className="hero py-16 md:py-24 bg-hero-gradient relative overflow-hidden">
+        <Parallax speed={0.4} className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/60 to-sky-400/60 z-10"></div>
+          <div className="bg-[url('https://images.unsplash.com/photo-1631248055158-edec7a3c072b?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0"></div>
+        </Parallax>
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 md:pr-8 text-center md:text-left mb-10 md:mb-0">
               <BlurText
@@ -78,33 +86,37 @@ export default function Index() {
                 delay={150}
                 animateBy="words"
                 direction="top"
-                className="text-3xl md:text-5xl font-bold mb-6 text-foreground"
+                className="text-3xl md:text-5xl font-bold mb-6 text-white"
               />
-              <p className="text-lg md:text-l mb-8 text-muted">
+              <p className="text-lg md:text-l mb-8 text-white/90">
                 Selalu pantau website kami untuk informasi eksklusif dan penawaran spesial
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Button asChild size="lg" className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button asChild size="lg" className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90 hover-scale">
                   <Link to="/doctor-schedule">Cari Dokter</Link>
                 </Button>
-                <Button asChild variant="secondary" size="lg" className="bg-secondary text-foreground hover:bg-secondary/80">
+                <Button asChild variant="secondary" size="lg" className="bg-white text-foreground hover:bg-white/80 hover-scale">
                   <Link to="/services">Layanan Kami</Link>
                 </Button>
               </div>
             </div>
-            <div className="md:w-1/2">
-              <img 
-                src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                alt="Medical professionals" 
-                className="rounded-lg shadow-xl w-full"
-              />
-            </div>
+            <Parallax speed={-0.2} className="md:w-1/2">
+              <div className="relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                  alt="Medical professionals" 
+                  className="rounded-lg shadow-xl w-full hover-lift"
+                />
+                <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary rounded-full animate-float opacity-80"></div>
+                <div className="absolute -top-4 -right-4 w-16 h-16 bg-secondary rounded-full animate-float opacity-80" style={{ animationDelay: "2s" }}></div>
+              </div>
+            </Parallax>
           </div>
         </div>
       </section>
 
       {/* Rekanan Section */}
-      <section className="bg-background py-12">
+      <AnimatedSection animationStyle="fade-in" className="bg-background py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold mb-8 text-foreground text-center">Rekanan</h2>
           <Carousel className="w-full max-w-4xl mx-auto">
@@ -115,7 +127,7 @@ export default function Index() {
                     <img
                       src={partner.logo}
                       alt={`${partner.name} logo`}
-                      className="mx-auto h-16 w-16 object-contain hover:shadow-lg transition-shadow"
+                      className="mx-auto h-16 w-16 object-contain hover-scale"
                     />
                     <p className="mt-2 text-sm text-muted">{partner.name}</p>
                   </div>
@@ -126,10 +138,10 @@ export default function Index() {
             <CarouselNext />
           </Carousel>
         </div>
-      </section>  
+      </AnimatedSection>  
 
       {/* Featured Services */}
-      <section className="section bg-background">
+      <AnimatedSection animationStyle="stagger-children" className="section bg-background">
         <div className="container mx-auto px-4">
           <h2 className="section-title text-foreground">Layanan Kami</h2>
           <p className="section-subtitle text-muted">
@@ -142,7 +154,7 @@ export default function Index() {
               const IconComponent = (iconMap[service.icon as keyof typeof iconMap] || iconMap["default"]) as React.ElementType;
               
               return (
-                <div key={service.id} className="border-primary shadow-md hover:shadow-lg transition-shadow bg-secondary p-6 text-center rounded-lg">
+                <div key={service.id} className="border-primary shadow-md hover-glow bg-secondary p-6 text-center rounded-lg">
                   <div className="flex justify-center mb-4">
                     <div className="p-3 bg-popover rounded-full">
                       <IconComponent className="h-8 w-8 text-primary" />
@@ -150,7 +162,7 @@ export default function Index() {
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-foreground">{service.name}</h3>
                   <p className="text-muted mb-4">{service.description}</p>
-                  <Button asChild variant="link" className="text-primary">
+                  <Button asChild variant="link" className="text-primary hover-scale">
                     <Link to={`/services#${service.id}`}>Baca Selengkapnya</Link>
                   </Button>
                 </div>
@@ -159,64 +171,69 @@ export default function Index() {
           </div>
           
           <div className="text-center mt-12">
-            <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 hover-scale">
               <Link to="/services">Lihat Semua Layanan</Link>
             </Button>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* Why Choose Us */}
-      <section className="bg-secondary section">
-        <div className="container mx-auto px-4">
+      <section className="bg-secondary section relative overflow-hidden">
+        <Parallax speed={0.15} className="absolute inset-0 z-0 opacity-20">
+          <div className="bg-[url('https://images.unsplash.com/photo-1631248055158-edec7a3c072b?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0"></div>
+        </Parallax>
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-1/2 mb-8 md:mb-0">
+            <AnimatedSection animationStyle="slide-up" className="md:w-1/2 mb-8 md:mb-0">
               <img 
                 src="https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
                 alt="Medical team" 
-                className="rounded-lg shadow-lg"
+                className="rounded-lg shadow-lg hover-lift"
               />
-            </div>
-            <div className="md:w-1/2 md:pl-12">
+            </AnimatedSection>
+            
+            <AnimatedSection animationStyle="stagger-children" className="md:w-1/2 md:pl-12">
               <h2 className="text-3xl font-bold mb-6 text-foreground">Kenapa memilih RS Kartini Bandung?</h2>
               
               <div className="space-y-6">
-                <div>
+                <div className="p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
                   <h3 className="text-xl font-semibold mb-2 text-foreground">Tim Medis Ahli</h3>
                   <p className="text-muted">Para dokter dan staf medis kami adalah para ahli di bidangnya, yang berdedikasi untuk memberikan perawatan yang luar biasa.</p>
                 </div>
                 
-                <div>
+                <div className="p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
                   <h3 className="text-xl font-semibold mb-2 text-foreground">Teknologi Canggih</h3>
                   <p className="text-muted">Kami berinvestasi dalam peralatan dan teknologi medis terbaru untuk meningkatkan akurasi diagnosis dan efektivitas pengobatan.</p>
                 </div>
                 
-                <div>
+                <div className="p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
                   <h3 className="text-xl font-semibold mb-2 text-foreground">Perawatan yang Berpusat pada Pasien</h3>
                   <p className="text-muted">Kenyamanan, martabat, dan kebutuhan individu Anda adalah pusat dari pendekatan perawatan kesehatan kami.</p>
                 </div>
                 
-                <div>
+                <div className="p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
                   <h3 className="text-xl font-semibold mb-2 text-foreground">Layanan Komprehensif</h3>
                   <p className="text-muted">Dari perawatan pencegahan hingga perawatan yang rumit, kami menawarkan berbagai layanan medis dalam satu atap.</p>
                 </div>
               </div>
               
-              <Button asChild className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button asChild className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90 hover-scale">
                 <Link to="/about">Pelajari Tentang Rumah Sakit Kami</Link>
               </Button>
-            </div>
+            </AnimatedSection>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="bg-background py-12">
+      <AnimatedSection animationStyle="fade-in" className="bg-background py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold mb-8 text-foreground text-center">Pertanyaan yang Sering Diajukan</h2>
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
             {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
+              <AccordionItem key={index} value={`item-${index}`} className="hover-lift">
                 <AccordionTrigger className="text-lg text-foreground hover:text-primary">
                   {faq.question}
                 </AccordionTrigger>
@@ -227,27 +244,34 @@ export default function Index() {
             ))}
           </Accordion>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* CTA Section */}
-      <section className="section bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Butuh Bantuan Medis?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Tim medis profesional kami siap memberikan perawatan yang Anda butuhkan.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-secondary text-foreground hover:bg-secondary/80">
-              <Link to="/doctor-schedule">Jadwalkan Janji Temu</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="text-foreground border-primary-foreground hover:bg-primary-foreground/10">
-              <Link to="/contact">Kontak Kami</Link>
-            </Button>
-          </div>
+      <section className="section bg-primary text-primary-foreground relative overflow-hidden">
+        <Parallax speed={0.2} className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary to-blue-500 opacity-50"></div>
+          <div className="bg-[url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0 mix-blend-overlay"></div>
+        </Parallax>
+        
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <AnimatedSection animationStyle="slide-up">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Butuh Bantuan Medis?</h2>
+            <p className="text-xl mb-8 max-w-2xl mx-auto">
+              Tim medis profesional kami siap memberikan perawatan yang Anda butuhkan.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 hover-scale">
+                <Link to="/doctor-schedule">Jadwalkan Janji Temu</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/10 hover-scale">
+                <Link to="/contact">Kontak Kami</Link>
+              </Button>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 
       <Footer />
-    </>
+    </div>
   );
 }
