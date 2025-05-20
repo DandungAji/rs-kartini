@@ -1,4 +1,3 @@
-
 export type Service = {
   id: string;
   name: string;
@@ -20,8 +19,8 @@ export type Doctor = {
   contact: string;
   bio: string;
   photo_url: string;
-  email?: string;  // Added email property
-  phone?: string;  // Added phone property
+  email?: string;
+  phone?: string;
 };
 
 export type Schedule = {

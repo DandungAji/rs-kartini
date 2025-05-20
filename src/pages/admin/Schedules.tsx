@@ -117,7 +117,7 @@ export default function Schedules() {
     const fetchDoctors = async () => {
       const { data, error } = await supabase
         .from('doctors')
-        .select('id, name')
+        .select('id, name, specialization_id, bio, contact, photo_url')
         .order('name');
       if (error) {
         toast({
@@ -127,11 +127,23 @@ export default function Schedules() {
         });
         console.error("Fetch doctors error:", error);
       } else {
-        setDoctors(data);
-        if (data.length > 0) {
-          setNewSchedule(prev => ({ ...prev, doctor_id: data[0].id }));
+        // Transform the data to match Doctor type
+        const processedDoctors = data.map(doc => ({
+          id: doc.id,
+          name: doc.name,
+          specialization_id: doc.specialization_id || '',
+          specialization: { name: doc.specialization_id || '' },
+          contact: doc.contact || '',
+          bio: doc.bio || '',
+          photo_url: doc.photo_url || '/placeholder.svg',
+          email: '', // Adding required fields from the Doctor type
+          phone: ''
+        }));
+        setDoctors(processedDoctors);
+        if (processedDoctors.length > 0) {
+          setNewSchedule(prev => ({ ...prev, doctor_id: processedDoctors[0].id }));
         }
-        console.log("Doctors fetched:", data);
+        console.log("Doctors fetched:", processedDoctors);
       }
     };
 
