@@ -1,335 +1,287 @@
-import { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import PageHeader from "@/components/PageHeader";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import PageHeader from "@/components/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
+import { Schedule, Doctor, ensureObject } from "@/lib/types";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/lib/supabase";
-import { Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-interface Doctor {
-  id: string;
-  name: string;
-  specialization: string;
-  photo_url: string | null;
-  bio: string | null;
-}
-
-interface Schedule {
-  id: string;
-  doctor_id: string;
-  days: string;
-  start_time: string;
-  end_time: string;
-  status: string;
-}
-
-interface Specialization {
-  id: string;
-  name: string;
-}
-
-const weekDays = [
-  "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"
-];
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Search, Calendar, Clock } from "lucide-react";
+import AnimatedSection from "@/components/AnimatedSection";
 
 export default function DoctorSchedule() {
-  const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [specializations, setSpecializations] = useState<Specialization[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDay, setSelectedDay] = useState("all");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("all");
 
-  // Fetch data from Supabase
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch doctors with specialization name
-        const { data: doctorsData, error: doctorsError } = await supabase
-          .from('doctors')
-          .select(`
+  // Fetch doctors and schedules
+  const { data: doctors = [], isLoading: loadingDoctors } = useQuery({
+    queryKey: ["doctors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctors")
+        .select(`
+          id, 
+          name, 
+          specialization:specializations (
+            name,
+            id
+          )
+        `)
+        .order("name");
+      
+      if (error) throw error;
+      
+      return data.map((doctor: any) => ({
+        ...doctor,
+        specialization: ensureObject(doctor.specialization)
+      })) as Doctor[];
+    },
+  });
+
+  const { data: schedules = [], isLoading: loadingSchedules } = useQuery({
+    queryKey: ["schedules"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("schedules")
+        .select(`
+          id,
+          doctor_id,
+          doctor:doctors (
             id,
             name,
-            photo_url,
-            bio,
-            specializations:specialization_id (name)
-          `);
-        
-        if (doctorsError) throw new Error("Gagal mengambil data dokter: " + doctorsError.message);
+            specialization:specializations (
+              id,
+              name
+            )
+          ),
+          days,
+          start_time,
+          end_time,
+          status
+        `)
+        .eq("status", "active");
 
-        // Fetch schedules
-        const { data: schedulesData, error: schedulesError } = await supabase
-          .from('schedules')
-          .select('id, doctor_id, days, start_time, end_time, status')
-          .eq('status', 'active');
+      if (error) throw error;
 
-        if (schedulesError) throw new Error("Gagal mengambil data jadwal: " + schedulesError.message);
+      return data.map((schedule: any) => ({
+        ...schedule,
+        doctor: {
+          ...ensureObject(schedule.doctor),
+          specialization: ensureObject(schedule.doctor.specialization)
+        }
+      })) as Schedule[];
+    },
+  });
 
-        // Fetch specializations
-        const { data: specializationsData, error: specializationsError } = await supabase
-          .from('specializations')
-          .select('id, name');
-
-        if (specializationsError) throw new Error("Gagal mengambil data spesialisasi: " + specializationsError.message);
-
-        // Transform doctors data to include specialization name with fallback
-        const formattedDoctors: Doctor[] = doctorsData
-          .map((doctor) => {
-            const specializationName = doctor.specializations?.name || "Unknown Specialization";
-            if (!doctor.specializations) {
-              console.warn(`Doctor ${doctor.name} (ID: ${doctor.id}) has no valid specialization.`);
-            }
-            return {
-              id: doctor.id,
-              name: doctor.name,
-              specialization: specializationName,
-              photo_url: doctor.photo_url,
-              bio: doctor.bio,
-            };
-          })
-          // Optionally filter out doctors with invalid specializations
-          .filter(doctor => doctor.specialization !== "Unknown Specialization");
-
-        setDoctors(formattedDoctors);
-        setSchedules(schedulesData);
-        setSpecializations(specializationsData);
-      } catch (err: any) {
-        setError(err.message);
-        toast({
-          title: "Kesalahan",
-          description: err.message,
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+  // Extract unique specialties from doctors
+  const specialties = React.useMemo(() => {
+    const specialtySet = new Set<string>();
+    doctors.forEach((doctor) => {
+      if (doctor.specialization?.name) {
+        specialtySet.add(doctor.specialization.name);
       }
-    };
-
-    fetchData();
-  }, [toast]);
-
-  // Filter doctors based on search and department
-  const filteredDoctors = useMemo(() => {
-    return doctors.filter(doctor => {
-      const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           doctor.specialization.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDepartment = selectedDepartment === "all" || doctor.specialization === selectedDepartment;
-      return matchesSearch && matchesDepartment;
     });
-  }, [doctors, searchQuery, selectedDepartment]);
+    return Array.from(specialtySet);
+  }, [doctors]);
 
-  // Group doctors by specialization
-  const doctorsBySpecialization = useMemo(() => {
-    const grouped: Record<string, Doctor[]> = {};
+  // Filter schedules based on search and filters
+  const filteredSchedules = React.useMemo(() => {
+    return schedules.filter((schedule) => {
+      const doctorName = schedule.doctor?.name || "";
+      const specialtyName = schedule.doctor?.specialization?.name || "";
+      
+      const matchesSearch = doctorName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDay = selectedDay === "all" || schedule.days === selectedDay;
+      const matchesSpecialty = selectedSpecialty === "all" || specialtyName === selectedSpecialty;
+      
+      return matchesSearch && matchesDay && matchesSpecialty;
+    });
+  }, [schedules, searchTerm, selectedDay, selectedSpecialty]);
+
+  // Group schedules by day for better organization
+  const schedulesByDay = React.useMemo(() => {
+    const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const grouped: Record<string, Schedule[]> = {};
     
-    filteredDoctors.forEach(doctor => {
-      if (!grouped[doctor.specialization]) {
-        grouped[doctor.specialization] = [];
-      }
-      grouped[doctor.specialization].push(doctor);
+    days.forEach(day => {
+      grouped[day] = filteredSchedules.filter(schedule => schedule.days === day);
     });
     
     return grouped;
-  }, [filteredDoctors]);
-
-  // Get schedules for a specific doctor
-  const getDoctorSchedules = (doctorId: string) => {
-    return schedules.filter(schedule => schedule.doctor_id === doctorId);
-  };
-
-  // Check if there are any doctors with schedules on the given day
-  const hasDoctorsOnDay = (day: string) => {
-    return filteredDoctors.some(doctor => 
-      getDoctorSchedules(doctor.id).some(schedule => schedule.days === day)
-    );
-  };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <p className="text-muted-foreground">Memuat jadwal dokter...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <p className="text-destructive">Terjadi kesalahan: {error}</p>
-      </div>
-    );
-  }
+  }, [filteredSchedules]);
 
   return (
-    <>
+    <div>
       <Navbar />
       
       <PageHeader 
         title="Jadwal Dokter" 
-        subtitle="Cari dan pesan janji temu dengan profesional medis kami"
+        subtitle="Temukan jadwal praktik dokter spesialis kami dan buat janji temu untuk konsultasi"
       />
+      
       <div className="container mx-auto px-4 py-12">
-        {/* Filters */}
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Input
-              placeholder="Cari nama dokter"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full border-primary focus:ring-primary"
-            />
+        <AnimatedSection animationStyle="fade-in" className="mb-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl font-bold mb-4">Cari Jadwal Dokter</h2>
+            <p className="text-muted-foreground mb-6">
+              Gunakan filter di bawah untuk menemukan jadwal dokter yang Anda butuhkan
+            </p>
           </div>
-          <div>
-            <Select
-              value={selectedDepartment}
-              onValueChange={setSelectedDepartment}
-            >
-              <SelectTrigger className="w-full border-primary focus:ring-primary">
-                <SelectValue placeholder="Filter berdasarkan spesialisasi" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Spesialis</SelectItem>
-                {specializations.map((spec) => (
-                  <SelectItem key={spec.id} value={spec.name}>
-                    {spec.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        </AnimatedSection>
         
-        {/* Schedules by Day of Week */}
-        <Tabs defaultValue="Senin" className="mb-12">
-          <TabsList className="w-full overflow-x-auto flex justify-start md:justify-center bg-primary text-muted-foreground">
-            {weekDays.map(day => (
-              <TabsTrigger key={day} value={day} className="flex-1 md:flex-none">
-                {day}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          
-          {weekDays.map(day => (
-            <TabsContent key={day} value={day} className="mt-6">
-              <h3 className="text-xl font-semibold mb-6 text-foreground">Dokter yang tersedia di hari {day}</h3>
-              
-              {Object.entries(doctorsBySpecialization).map(([specialization, docs]) => {
-                // Filter doctors who have a schedule on this day
-                const doctorsOnThisDay = docs.filter(doctor => {
-                  return getDoctorSchedules(doctor.id).some(schedule => schedule.days === day);
-                });
-                
-                if (doctorsOnThisDay.length === 0) return null;
-                
-                return (
-                  <div key={specialization} className="mb-8">
-                    <h4 className="text-lg font-medium mb-4 bg-secondary text-foreground py-2 px-4 rounded-md">
-                      {specialization}
-                    </h4>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {doctorsOnThisDay.map(doctor => {
-                        const doctorSchedules = getDoctorSchedules(doctor.id).filter(
-                          schedule => schedule.days === day
-                        );
-                        
-                        return (
-                          <Card key={doctor.id} className="overflow-hidden hover:shadow-md transition-shadow bg-card text-foreground border-primary">
-                            <div className="flex items-center p-4 border-b border-primary">
-                              <div className="h-16 w-16 rounded-full overflow-hidden mr-4">
-                                <img 
-                                  src={doctor.photo_url || "https://via.placeholder.com/200"} 
-                                  alt={doctor.name} 
-                                  className="h-full w-full object-cover"
-                                />
-                              </div>
-                              <div>
-                                <h5 className="font-semibold text-foreground">{doctor.name}</h5>
-                                <p className="text-sm text-muted">{doctor.specialization}</p>
-                              </div>
-                            </div>
-                            <CardContent className="p-4">
-                              {doctorSchedules.map(schedule => (
-                                <div key={schedule.id} className="flex items-center mb-2">
-                                  <Clock size={16} className="mr-2 text-primary" />
-                                  <span className="text-foreground">
-                                    {schedule.start_time} - {schedule.end_time}
-                                  </span>
-                                </div>
-                              ))}
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-              
-              {!hasDoctorsOnDay(day) && (
-                <div className="text-center py-8">
-                  <p className="text-muted">Dokter yang Anda cari tidak praktek pada hari {day}.</p>
-                </div>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs>
-
-        {/* Schedule Change Notice */}
-        <p className="text-sm text-muted italic mb-8">
-          *Jadwal dapat berubah sewaktu-waktu.
-        </p>
-
-        {/* All Doctors */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6 text-foreground">Dokter Spesialis Kami</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDoctors.map(doctor => (
-              <Card key={doctor.id} className="overflow-hidden hover:shadow-md transition-shadow bg-card text-foreground border-primary">
-                <div className="h-48 overflow-hidden">
-                  <img 
-                    src={doctor.photo_url || "https://via.placeholder.com/400"} 
-                    alt={doctor.name} 
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-1 text-foreground">{doctor.name}</h3>
-                  <p className="text-primary mb-3">{doctor.specialization}</p>
-                  <p className="text-muted mb-4 line-clamp-2">{doctor.bio || "Tidak ada bio tersedia."}</p>
-                  
-                  <div className="mt-auto">
-                    <h4 className="font-medium mb-2 text-foreground">Tersedia di:</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {getDoctorSchedules(doctor.id).map(schedule => (
-                        <span key={schedule.id} className="text-xs bg-primary text-background py-1 px-2 rounded">
-                          {schedule.days}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          {filteredDoctors.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Dokter yang Anda cari tidak ditemukan.</p>
+        <AnimatedSection animationStyle="slide-up" className="mb-8">
+          <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+              <Input
+                placeholder="Cari nama dokter..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-          )}
-        </div>
+            
+            <div className="flex gap-4">
+              <Select value={selectedDay} onValueChange={setSelectedDay}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Pilih hari" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua hari</SelectItem>
+                  <SelectItem value="Senin">Senin</SelectItem>
+                  <SelectItem value="Selasa">Selasa</SelectItem>
+                  <SelectItem value="Rabu">Rabu</SelectItem>
+                  <SelectItem value="Kamis">Kamis</SelectItem>
+                  <SelectItem value="Jumat">Jumat</SelectItem>
+                  <SelectItem value="Sabtu">Sabtu</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Pilih spesialisasi" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua spesialisasi</SelectItem>
+                  {specialties.map((specialty) => (
+                    <SelectItem key={specialty} value={specialty}>
+                      {specialty}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </AnimatedSection>
+        
+        {loadingDoctors || loadingSchedules ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Memuat jadwal dokter...</p>
+          </div>
+        ) : (
+          <AnimatedSection animationStyle="fade-in" className="space-y-8">
+            {Object.entries(schedulesByDay).map(([day, daySchedules]) => 
+              daySchedules.length > 0 && (
+                <div key={day} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="bg-primary text-white p-4">
+                    <h3 className="text-xl font-semibold flex items-center">
+                      <Calendar className="mr-2 h-5 w-5" />
+                      {day}
+                    </h3>
+                  </div>
+                  
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[250px]">Dokter</TableHead>
+                          <TableHead>Spesialisasi</TableHead>
+                          <TableHead>Waktu</TableHead>
+                          <TableHead className="text-right">Reservasi</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {daySchedules.map((schedule) => (
+                          <TableRow key={schedule.id}>
+                            <TableCell className="font-medium">
+                              {schedule.doctor?.name || "Dokter Tidak Diketahui"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-secondary/50">
+                                {schedule.doctor?.specialization?.name || "Umum"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <Clock className="h-4 w-4 mr-2 text-primary" />
+                                <span>
+                                  {schedule.start_time} - {schedule.end_time}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button size="sm" className="hover-scale">
+                                Buat Janji
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )
+            )}
+            
+            {filteredSchedules.length === 0 && (
+              <div className="text-center py-12 bg-white rounded-lg shadow-md">
+                <div className="text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                  <p className="text-lg">Tidak ada jadwal dokter yang ditemukan</p>
+                  <p className="mt-2">Silakan coba dengan filter yang berbeda</p>
+                </div>
+              </div>
+            )}
+          </AnimatedSection>
+        )}
+        
+        <AnimatedSection animationStyle="slide-up" className="mt-12 max-w-3xl mx-auto bg-secondary/50 p-6 rounded-lg">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="md:w-2/3">
+              <h3 className="text-xl font-bold mb-2">Butuh bantuan untuk reservasi?</h3>
+              <p className="text-muted-foreground">
+                Hubungi kami melalui WhatsApp atau telepon untuk bantuan dalam membuat janji temu dengan dokter
+              </p>
+            </div>
+            <div className="md:w-1/3 flex justify-center">
+              <Button size="lg" className="hover-scale">
+                Hubungi Kami
+              </Button>
+            </div>
+          </div>
+        </AnimatedSection>
       </div>
       
       <Footer />
-    </>
+    </div>
   );
 }

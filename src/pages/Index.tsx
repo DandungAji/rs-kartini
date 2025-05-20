@@ -1,6 +1,4 @@
-
-import SplitText from '/Reactbits/SplitText/SplitText'
-import BlurText from '/Reactbits/BlurText/BlurText'
+import React from 'react';
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { services } from "@/lib/mockData";
@@ -22,6 +20,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import SplitText from '/Reactbits/SplitText/SplitText'
+import BlurText from '/Reactbits/BlurText/BlurText'
 
 export default function Index() {
   // Featured services for the homepage
@@ -61,7 +61,7 @@ export default function Index() {
     Siren: Siren,
     Bed: Bed,
     Microscope: Microscope,
-    Scan: Scan, // Mengganti ScanHeart karena tidak ada di lucide-react
+    Scan: Scan,
     Pill: Pill,
     // Fallback
     default: Activity,
@@ -81,7 +81,7 @@ export default function Index() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 md:pr-8 text-center md:text-left mb-10 md:mb-0">
-              <BlurText
+              <SplitText
                 text="Jangan Lewatkan Kesempatan Terbaik!"
                 delay={150}
                 animateBy="words"

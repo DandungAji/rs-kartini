@@ -58,6 +58,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { Schedule, Doctor, ensureObject } from "@/lib/types";
 
 interface Doctor {
   id: string;
