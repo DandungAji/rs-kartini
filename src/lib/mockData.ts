@@ -83,7 +83,7 @@ export const services: Service[] = [
     ],
     procedures: [
       "Pemeriksaan dengan alat radiologi",
-      "Interpretasi hasil oleh radiolog",
+      "Interpretasi hasil oleh radiologi",
       "Konsultasi hasil dengan dokter"
     ]
   },

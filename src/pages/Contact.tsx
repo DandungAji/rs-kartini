@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin, Phone } from "lucide-react";
 import emailjs from "@emailjs/browser";
-import Parallax from "@/components/Parallax";
 import AnimatedSection from "@/components/AnimatedSection";
 
 export default function Contact() {
@@ -47,7 +46,7 @@ export default function Contact() {
         subject: formData.subject,
         message: formData.message,
       },
-      "YOUR_USER_ID" // Ganti dengan User ID Anda
+      "webrskartini@gmail.com" // user ID EmailJS
     ).then(
       (result) => {
         toast({
@@ -78,17 +77,11 @@ export default function Contact() {
     <div className="overflow-x-hidden">
       <Navbar />
       
-      <div className="relative">
-        <Parallax speed={0.4} className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-blue-500/90 z-10"></div>
-          <div className="bg-[url('https://images.unsplash.com/photo-1587351021759-3e566b3db3f2?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0"></div>
-        </Parallax>
-        
-        <PageHeader 
-          title="Kontak Kami" 
-          subtitle="Hubungi tim kami untuk pertanyaan dan janji temu"
-          className="relative z-10 bg-transparent"
-        />
+      <div className="relative">    
+      <PageHeader 
+        title="Kontak Kami" 
+        subtitle="Hubungi tim kami untuk pertanyaan dan janji temu"
+      />
       </div>
       
       <div className="container mx-auto px-4 py-12">

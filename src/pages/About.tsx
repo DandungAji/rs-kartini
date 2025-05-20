@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AnimatedSection from "@/components/AnimatedSection";
 
 export default function About() {
   return (
@@ -16,18 +17,22 @@ export default function About() {
       
       <div className="container mx-auto px-4 py-12">
         {/* History & Overview */}
-        <section className="mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        
+        <AnimatedSection animationStyle="slide-up" className="mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-6">Our History</h2>
+              <h2 className="text-3xl font-bold mb-6">Sejarah Kami</h2>
               <p className="text-gray-700 mb-4">
-                Founded in 1990, Rumah Sakit Kartini began as a small community clinic with a team of dedicated medical professionals committed to providing quality healthcare to the local community.
+                Rumah Sakit Kartini di Bandung telah berdiri dan melayani warga Bandung dan sekitarnya sejak tahun 1988. Awalnya, RS Kartini dimulai dari pelayanan kesehatan oleh Ibu Bidan Kartini di Jalan Pahlawan Bandung dan berkembang dari masa ke masa.
               </p>
               <p className="text-gray-700 mb-4">
-                Over the years, we've expanded our facilities and services, growing into a comprehensive medical center while maintaining our commitment to patient-centered care and clinical excellence.
+                Pada tahun 2004, Ibu Bidan Kartini meningkatkan pelayanan kesehatan yang diberikan menjadi Klinik Khusus Kebidanan dan Bedah Kartini. Kemudian, pada tahun 2010, status pelayanan berubah menjadi Klinik Utama Kartini dibawah naungan PT. Kasih Ibu Kartini (KIK).
+              </p>
+              <p className="text-gray-700 mb-4">
+                RS Kartini memiliki layanan medis unggulan di bidang Ginekologi & Obstetri, Pediatri. Selain itu, RS Kartini juga memberikan pelayanan kesehatan dokter umum, klinik gigi, laboratorium, apotek, serta fasilitas ruang melahirkan (VK) dan fasilitas rawat inap.
               </p>
               <p className="text-gray-700">
-                Today, Rumah Sakit Kartini stands as a leading healthcare provider, equipped with state-of-the-art technology and staffed by top medical specialists across various disciplines.
+                RS Kartini didukung oleh dokter spesialis dan dokter umum yang kompeten di bidangnya serta peralatan yang memadai. RS Kartini siap untuk memberikan pelayanan kesehatan terbaik bagi warga Bandung dan sekitarnya yang. membutuhkan pelayanan medis dan Kesehatan
               </p>
             </div>
             <div className="order-first md:order-last">
@@ -38,11 +43,12 @@ export default function About() {
               />
             </div>
           </div>
-        </section>
+        </AnimatedSection>
+        
         
         {/* Timeline */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">Sejarah Kami</h2>
+        <AnimatedSection animationStyle="fade-in" delay={200} className="mb-16">
+          <h2 className="text-3xl font-bold mb-8 text-center">Perjalanan Kami</h2>
           <div className="space-y-12">
             <div className="flex flex-col md:flex-row gap-4">
             <div className="md:w-1/3 p-6 bg-secondary rounded-lg">
@@ -86,10 +92,10 @@ export default function About() {
               </div>
             </div>
           </div>
-        </section>
+        </AnimatedSection>
         
         {/* Mission, Vision, Values */}
-        <section className="mb-16">
+        <AnimatedSection animationStyle="stagger-children" delay={200} className="mb-16">
           <Tabs defaultValue="mission" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-primary text-muted-foreground">
               <TabsTrigger value="mission">Misi</TabsTrigger>
@@ -140,9 +146,9 @@ export default function About() {
               </ul>
             </TabsContent>
           </Tabs>
-        </section>
+        </AnimatedSection>
         
-        {/* Team & Leadership */}
+        {/* Team & Leadership
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8 text-center">Our Leadership</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -191,21 +197,21 @@ export default function About() {
               </p>
             </div>
           </div>
-        </section>
+        </section> */}
         
         {/* Facilities & Technology */}
-        <section>
-          <h2 className="text-3xl font-bold mb-8 text-center">Our Facilities</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <AnimatedSection animationStyle="stagger-children" delay={200} className="mb-16">
+          <h2 className="text-3xl font-bold mb-8 text-center">Fasilitas Kami</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
             <div>
               <img 
                 src="https://images.unsplash.com/photo-1504439468489-c8920d796a29?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
                 alt="Hospital facilities" 
                 className="rounded-lg shadow-lg mb-4"
               />
-              <h3 className="text-xl font-bold mb-2">State-of-the-art Equipment</h3>
+              <h3 className="text-xl font-bold mb-2">Peralatan yang Canggih</h3>
               <p className="text-gray-700">
-                Our hospital is equipped with the latest medical technology, including advanced diagnostic imaging, minimally invasive surgical systems, and electronic health record systems.
+                Rumah sakit kami dilengkapi dengan teknologi medis terkini, termasuk pencitraan diagnostik canggih, dan sistem rekam medis elektronik.
               </p>
             </div>
             
@@ -215,13 +221,13 @@ export default function About() {
                 alt="Medical technology" 
                 className="rounded-lg shadow-lg mb-4"
               />
-              <h3 className="text-xl font-bold mb-2">Comfortable Environment</h3>
+              <h3 className="text-xl font-bold mb-2">Lingkungan yang Nyaman</h3>
               <p className="text-gray-700">
-                We've designed our facilities with patient comfort in mind, featuring private rooms, family waiting areas, a cafeteria with healthy options, and healing gardens throughout the campus.
+                Kami telah merancang fasilitas kami dengan mempertimbangkan kenyamanan pasien, yang dilengkapi dengan kamar yang nyaman, ruang tunggu pasien, kantin dengan pilihan makanan rumahan.
               </p>
             </div>
           </div>
-        </section>
+        </AnimatedSection>
       </div>
       
       <Footer />

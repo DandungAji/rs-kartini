@@ -77,29 +77,24 @@ export default function Index() {
       
       {/* Hero Section with Parallax */}
       <section className="hero py-16 md:py-24 bg-hero-gradient relative overflow-hidden">
-        <Parallax speed={0.4} className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/60 to-sky-400/60 z-10"></div>
-          <div className="bg-[url('https://images.unsplash.com/photo-1631248055158-edec7a3c072b?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0"></div>
-        </Parallax>
-        
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 md:pr-8 text-center md:text-left mb-10 md:mb-0">
-              <SplitText
+              <BlurText
                 text="Jangan Lewatkan Kesempatan Terbaik!"
                 delay={150}
                 animateBy="words"
                 direction="top"
-                className="text-3xl md:text-5xl font-bold mb-6 text-white"
+                className="text-3xl md:text-5xl font-bold mb-6 text-foreground"
               />
-              <p className="text-lg md:text-l mb-8 text-white/90">
+              <p className="text-lg md:text-l mb-8 text-muted">
                 Selalu pantau website kami untuk informasi eksklusif dan penawaran spesial
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Button asChild size="lg" className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90 hover-scale">
                   <Link to="/doctor-schedule">Cari Dokter</Link>
                 </Button>
-                <Button asChild variant="secondary" size="lg" className="bg-white text-foreground hover:bg-white/80 hover-scale">
+                <Button asChild variant="secondary" size="lg" className="bg-background border border-muted/20 text-foreground hover:bg-background/80 hover-scale">
                   <Link to="/services">Layanan Kami</Link>
                 </Button>
               </div>
@@ -184,10 +179,6 @@ export default function Index() {
 
       {/* Why Choose Us */}
       <section className="bg-secondary section relative overflow-hidden">
-        <Parallax speed={0.15} className="absolute inset-0 z-0 opacity-20">
-          <div className="bg-[url('https://images.unsplash.com/photo-1631248055158-edec7a3c072b?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0"></div>
-        </Parallax>
-        
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center">
             <AnimatedSection animationStyle="slide-up" className="md:w-1/2 mb-8 md:mb-0">
@@ -202,22 +193,22 @@ export default function Index() {
               <h2 className="text-3xl font-bold mb-6 text-foreground">Kenapa memilih RS Kartini Bandung?</h2>
               
               <div className="space-y-6">
-                <div className="p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
+                <div className="p-4 bg-background/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
                   <h3 className="text-xl font-semibold mb-2 text-foreground">Tim Medis Ahli</h3>
                   <p className="text-muted">Para dokter dan staf medis kami adalah para ahli di bidangnya, yang berdedikasi untuk memberikan perawatan yang luar biasa.</p>
                 </div>
                 
-                <div className="p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
+                <div className="p-4 bg-background/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
                   <h3 className="text-xl font-semibold mb-2 text-foreground">Teknologi Canggih</h3>
                   <p className="text-muted">Kami berinvestasi dalam peralatan dan teknologi medis terbaru untuk meningkatkan akurasi diagnosis dan efektivitas pengobatan.</p>
                 </div>
                 
-                <div className="p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
+                <div className="p-4 bg-background/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
                   <h3 className="text-xl font-semibold mb-2 text-foreground">Perawatan yang Berpusat pada Pasien</h3>
                   <p className="text-muted">Kenyamanan, martabat, dan kebutuhan individu Anda adalah pusat dari pendekatan perawatan kesehatan kami.</p>
                 </div>
                 
-                <div className="p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
+                <div className="p-4 bg-background/70 backdrop-blur-sm rounded-lg shadow-sm hover-lift">
                   <h3 className="text-xl font-semibold mb-2 text-foreground">Layanan Komprehensif</h3>
                   <p className="text-muted">Dari perawatan pencegahan hingga perawatan yang rumit, kami menawarkan berbagai layanan medis dalam satu atap.</p>
                 </div>
@@ -264,10 +255,10 @@ export default function Index() {
               Tim medis profesional kami siap memberikan perawatan yang Anda butuhkan.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 hover-scale">
+              <Button asChild size="lg" className="bg-background text-foreground hover:bg-background/90 hover-scale">
                 <Link to="/doctor-schedule">Jadwalkan Janji Temu</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/10 hover-scale">
+              <Button asChild size="lg" variant="outline" className="text-background bg-primary border-primary-foreground hover:bg-primary-foreground/10 hover-scale">
                 <Link to="/contact">Kontak Kami</Link>
               </Button>
             </div>

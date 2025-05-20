@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -58,7 +58,21 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { Schedule, Doctor, ensureObject } from "@/lib/types";
+
+interface Doctor {
+  id: string;
+  name: string;
+}
+
+interface Schedule {
+  id: string;
+  doctor_id: string;
+  doctor?: { name: string };
+  days: string;
+  start_time: string;
+  end_time: string;
+  status: "active" | "inactive";
+}
 
 export default function Schedules() {
   const { user, loading } = useAuth();
@@ -105,19 +119,18 @@ export default function Schedules() {
         });
         console.error("Fetch schedules error:", error);
       } else {
-        const processedData = data.map((schedule: any) => ({
+        setSchedules(data.map(schedule => ({
           ...schedule,
-          doctor: ensureObject(schedule.doctor)
-        }));
-        setSchedules(processedData);
-        console.log("Schedules fetched:", processedData);
+          doctor: schedule.doctor || { name: 'Dokter Tidak Diketahui' }
+        })));
+        console.log("Schedules fetched:", data);
       }
     };
 
     const fetchDoctors = async () => {
       const { data, error } = await supabase
         .from('doctors')
-        .select('id, name, specialization_id, bio, contact, photo_url')
+        .select('id, name')
         .order('name');
       if (error) {
         toast({
@@ -127,23 +140,11 @@ export default function Schedules() {
         });
         console.error("Fetch doctors error:", error);
       } else {
-        // Transform the data to match Doctor type
-        const processedDoctors = data.map(doc => ({
-          id: doc.id,
-          name: doc.name,
-          specialization_id: doc.specialization_id || '',
-          specialization: { name: doc.specialization_id || '' },
-          contact: doc.contact || '',
-          bio: doc.bio || '',
-          photo_url: doc.photo_url || '/placeholder.svg',
-          email: '', // Adding required fields from the Doctor type
-          phone: ''
-        }));
-        setDoctors(processedDoctors);
-        if (processedDoctors.length > 0) {
-          setNewSchedule(prev => ({ ...prev, doctor_id: processedDoctors[0].id }));
+        setDoctors(data);
+        if (data.length > 0) {
+          setNewSchedule(prev => ({ ...prev, doctor_id: data[0].id }));
         }
-        console.log("Doctors fetched:", processedDoctors);
+        console.log("Doctors fetched:", data);
       }
     };
 
@@ -209,11 +210,7 @@ export default function Schedules() {
       });
       console.error("Insert error:", error);
     } else {
-      const processedData = {
-        ...data,
-        doctor: ensureObject(data.doctor)
-      };
-      setSchedules([...schedules, processedData]);
+      setSchedules([...schedules, { ...data, doctor: data.doctor || { name: 'Dokter Tidak Diketahui' } }]);
       toast({
         title: "Jadwal Ditambahkan",
         description: "Jadwal berhasil ditambahkan.",
@@ -276,11 +273,7 @@ export default function Schedules() {
       });
       console.error("Update error:", error);
     } else {
-      const processedData = {
-        ...data,
-        doctor: ensureObject(data.doctor)
-      };
-      setSchedules(schedules.map(s => s.id === data.id ? processedData : s));
+      setSchedules(schedules.map(s => s.id === data.id ? { ...data, doctor: data.doctor || { name: 'Dokter Tidak Diketahui' } } : s));
       toast({
         title: "Jadwal Diperbarui",
         description: "Jadwal berhasil diperbarui.",

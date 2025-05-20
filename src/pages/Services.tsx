@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Check } from "lucide-react";
 import Parallax from "@/components/Parallax";
 import AnimatedSection from "@/components/AnimatedSection";
+import { Button } from "@/components/ui/button";
 
 export default function Services() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -45,17 +46,11 @@ export default function Services() {
     <div className="overflow-x-hidden">
       <Navbar />
       
-      <div className="relative">
-        <Parallax speed={0.4} className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-blue-500/90 z-10"></div>
-          <div className="bg-[url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center absolute inset-0"></div>
-        </Parallax>
-        
+      <div className="relative">  
         <PageHeader 
-          title="Layanan Kami" 
-          subtitle="Layanan kesehatan yang komprehensif untuk semua kebutuhan medis Anda"
-          className="relative z-10 bg-transparent"
-        />
+        title="Layanan Kami" 
+        subtitle="Layanan kesehatan yang komprehensif untuk semua kebutuhan medis Anda"
+      />
       </div>
       
       <div className="container mx-auto px-4 py-12">

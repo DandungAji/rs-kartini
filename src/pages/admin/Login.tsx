@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import SplitText from '/Reactbits/SplitText/SplitText'
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -52,17 +50,23 @@ export default function Login() {
           <div className="flex justify-center">
             <img src="/images/logo.png" alt="RS Kartini" className="h-16 mr-2" />
           </div>
-          <h2 className="mt-4 text-2xl font-bold">
-            Admin RS Kartini
-          </h2>
+          <SplitText
+                    text="Admin RS Kartini"
+                    className="mt-4 text-2xl font-bold"
+                    delay={50}
+                    animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+                    animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+                    easing="easeOutCubic"
+                    threshold={0.2}
+                  />
           <p className="mt-2 text-gray-600">Masuk ke akun Anda</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
                 Username atau Email
-              </Label>
+              </label>
               <Input
                 id="identifier"
                 name="identifier"
@@ -75,9 +79,9 @@ export default function Login() {
               />
             </div>
             <div>
-              <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Kata Sandi
-              </Label>
+              </label>
               <Input
                 id="password"
                 name="password"

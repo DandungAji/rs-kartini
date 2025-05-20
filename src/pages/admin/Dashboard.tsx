@@ -1,316 +1,227 @@
-import React, { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { Post, Doctor, Schedule, ensureObject } from "@/lib/types";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Users, FileText, Activity, ArrowRight, Calendar, Clock } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { Calendar, File, User } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
-import { id } from "date-fns/locale";
+import id from "date-fns/locale/id";
+
+interface Doctor {
+  id: string;
+  name: string;
+  specialization?: { name: string };
+  photo_url?: string;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  author?: { full_name: string };
+  status: 'draft' | 'published';
+  publish_date?: string;
+}
+
+interface Stats {
+  totalDoctors: number;
+  totalSchedules: number;
+  publishedPosts: number;
+  draftPosts: number;
+}
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { toast } = useToast();
+  const [stats, setStats] = useState<Stats>({ totalDoctors: 0, totalSchedules: 0, publishedPosts: 0, draftPosts: 0 });
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [stats, setStats] = useState({
-    totalDoctors: 0,
-    totalPosts: 0,
-    totalAppointments: 0,
-    activeAppointments: 0,
-  });
+  const [posts, setPosts] = useState<Post[]>([]);
 
+  // Fetch data on mount
   useEffect(() => {
-    if (!user) return;
+    const fetchStats = async () => {
+      const [doctorsCount, schedulesCount, publishedPostsCount, draftPostsCount] = await Promise.all([
+        supabase.from('doctors').select('count', { count: 'exact' }).single(),
+        supabase.from('schedules').select('count', { count: 'exact' }).single(),
+        supabase.from('posts').select('count', { count: 'exact' }).eq('status', 'published').single(),
+        supabase.from('posts').select('count', { count: 'exact' }).eq('status', 'draft').single(),
+      ]);
 
-    const fetchRecentPosts = async () => {
-      const { data, error } = await supabase
-        .from('posts')
-        .select(`
-          id, 
-          title,
-          status,
-          publish_date,
-          content,
-          author:users (
-            full_name
-          )
-        `)
-        .order('publish_date', { ascending: false })
-        .limit(5);
-      
-      if (error) {
-        console.error("Error fetching posts:", error);
-      } else {
-        const processedPosts = data.map((post: any) => ({
-          ...post,
-          author: ensureObject(post.author),
-          category: { id: "", name: "" } // Default value to satisfy type
-        }));
-        setPosts(processedPosts);
-      }
-    };
+      setStats({
+        totalDoctors: doctorsCount.data?.count || 0,
+        totalSchedules: schedulesCount.data?.count || 0,
+        publishedPosts: publishedPostsCount.data?.count || 0,
+        draftPosts: draftPostsCount.data?.count || 0,
+      });
 
-    const fetchStatistics = async () => {
-      try {
-        const [doctorsCount, postsCount, appointmentsCount, activeAppointmentsCount] = await Promise.all([
-          supabase.from('doctors').select('id', { count: 'exact', head: true }),
-          supabase.from('posts').select('id', { count: 'exact', head: true }),
-          supabase.from('appointments').select('id', { count: 'exact', head: true }),
-          supabase.from('appointments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-        ]);
-
-        setStats({
-          totalDoctors: doctorsCount.count || 0,
-          totalPosts: postsCount.count || 0,
-          totalAppointments: appointmentsCount.count || 0,
-          activeAppointments: activeAppointmentsCount.count || 0,
+      if (doctorsCount.error || schedulesCount.error || publishedPostsCount.error || draftPostsCount.error) {
+        toast({
+          title: "Kesalahan",
+          description: "Gagal mengambil statistik: " + 
+            (doctorsCount.error?.message || schedulesCount.error?.message || 
+             publishedPostsCount.error?.message || draftPostsCount.error?.message),
+          variant: "destructive",
         });
-      } catch (error) {
-        console.error("Error fetching statistics:", error);
       }
     };
 
     const fetchDoctors = async () => {
       const { data, error } = await supabase
         .from('doctors')
-        .select(`
-          id, 
-          name, 
-          specialization:specializations (
-            name
-          ),
-          photo_url
-        `)
-        .order('name')
+        .select('id, name, specializations(name), photo_url')
+        .order('created_at', { ascending: false })
         .limit(5);
       
       if (error) {
-        console.error("Error fetching doctors:", error);
+        toast({
+          title: "Kesalahan",
+          description: "Gagal mengambil data dokter: " + error.message,
+          variant: "destructive",
+        });
       } else {
-        const processedDoctors = data.map((doctor: any) => ({
-          ...doctor,
-          specialization: ensureObject(doctor.specialization),
-          specialization_id: "", // Default value to satisfy type
-          contact: "",
-          bio: ""
-        }));
-        setDoctors(processedDoctors);
+        setDoctors(data);
       }
     };
 
-    const fetchAppointments = async () => {
+    const fetchPosts = async () => {
       const { data, error } = await supabase
-        .from('appointments')
+        .from('posts')
         .select(`
-          id,
-          patient_name,
-          appointment_date,
-          status,
-          doctor:doctors (
-            name
-          )
+          id, title, status, publish_date,
+          author:profiles(full_name)
         `)
-        .order('appointment_date', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(5);
       
       if (error) {
-        console.error("Error fetching appointments:", error);
+        toast({
+          title: "Kesalahan",
+          description: "Gagal mengambil data postingan: " + error.message,
+          variant: "destructive",
+        });
       } else {
-        const processedAppointments = data.map((appointment: any) => ({
-          ...appointment,
-          doctor: ensureObject(appointment.doctor)
-        }));
-        setAppointments(processedAppointments);
+        setPosts(data);
       }
     };
 
-    fetchRecentPosts();
-    fetchStatistics();
+    fetchStats();
     fetchDoctors();
-    fetchAppointments();
-  }, [user]);
+    fetchPosts();
+  }, [toast]);
 
-  if (loading) return <div className="p-4">Memuat...</div>;
-  if (!user) return <div className="p-4">Harap login untuk mengakses halaman ini.</div>;
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Belum Dipublikasikan";
+    try {
+      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('id-ID', options);
+    } catch {
+      return "Tanggal Tidak Valid";
+    }
+  };
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Selamat datang kembali, {user.user_metadata?.full_name || user.email}
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Total Dokter</p>
-              <p className="text-3xl font-bold">{stats.totalDoctors}</p>
-            </div>
-            <div className="p-3 bg-primary/10 rounded-full">
-              <Users className="h-6 w-6 text-primary" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">Total Dokter</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <User className="h-6 w-6 text-primary mr-2" />
+              <span className="text-3xl font-bold">{stats.totalDoctors}</span>
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Total Artikel</p>
-              <p className="text-3xl font-bold">{stats.totalPosts}</p>
-            </div>
-            <div className="p-3 bg-primary/10 rounded-full">
-              <FileText className="h-6 w-6 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Total Janji Temu</p>
-              <p className="text-3xl font-bold">{stats.totalAppointments}</p>
-            </div>
-            <div className="p-3 bg-primary/10 rounded-full">
-              <CalendarDays className="h-6 w-6 text-primary" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">Total Jadwal</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <Calendar className="h-6 w-6 text-primary mr-2" />
+              <span className="text-3xl font-bold">{stats.totalSchedules}</span>
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Janji Temu Aktif</p>
-              <p className="text-3xl font-bold">{stats.activeAppointments}</p>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">Postingan Dipublikasikan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <File className="h-6 w-6 text-primary mr-2" />
+              <span className="text-3xl font-bold">{stats.publishedPosts}</span>
             </div>
-            <div className="p-3 bg-primary/10 rounded-full">
-              <Activity className="h-6 w-6 text-primary" />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">Postingan Draft</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <File className="h-6 w-6 text-gray-400 mr-2" />
+              <span className="text-3xl font-bold">{stats.draftPosts}</span>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Posts */}
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Artikel Terbaru</CardTitle>
-              <CardDescription>Artikel yang baru dipublikasikan</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/admin/posts">
-                Lihat Semua <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Dokter Terbaru Ditambahkan</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {posts.length > 0 ? (
-                posts.map((post) => (
-                  <div key={post.id} className="flex items-start space-x-4 border-b pb-4 last:border-0">
-                    <div className="flex-1 space-y-1">
-                      <p className="font-medium">{post.title}</p>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Calendar className="mr-1 h-3 w-3" />
-                        {post.publish_date ? format(new Date(post.publish_date), 'dd MMM yyyy', { locale: id }) : 'Tanggal tidak tersedia'}
-                      </div>
-                    </div>
-                    <Badge variant={post.status === 'published' ? 'default' : 'outline'}>
-                      {post.status === 'published' ? 'Dipublikasikan' : 'Draft'}
-                    </Badge>
+              {doctors.map(doctor => (
+                <div key={doctor.id} className="flex items-center">
+                  <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+                    <img 
+                      src={doctor.photo_url || "https://via.placeholder.com/40"} 
+                      alt={doctor.name} 
+                      className="h-full w-full object-cover"
+                    />
                   </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4">Belum ada artikel</p>
-              )}
+                  <div>
+                    <p className="font-medium">{doctor.name}</p>
+                    <p className="text-sm text-gray-500">{doctor.specialization?.name || '-'}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
-
-        {/* Recent Appointments */}
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Janji Temu Terbaru</CardTitle>
-              <CardDescription>Janji temu yang baru dibuat</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/admin/appointments">
-                Lihat Semua <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Postingan Terbaru</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {appointments.length > 0 ? (
-                appointments.map((appointment) => (
-                  <div key={appointment.id} className="flex items-start space-x-4 border-b pb-4 last:border-0">
-                    <div className="flex-1 space-y-1">
-                      <p className="font-medium">{appointment.patient_name}</p>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="mr-1 h-3 w-3" />
-                        {appointment.appointment_date ? format(new Date(appointment.appointment_date), 'dd MMM yyyy, HH:mm', { locale: id }) : 'Tanggal tidak tersedia'}
+              {posts.map(post => (
+                <div key={post.id} className="flex items-center">
+                  <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center mr-3">
+                    <File size={16} className="text-primary" />
+                  </div>
+                  <div className="flex-grow">
+                    <p className="font-medium">{post.title}</p>
+                    <div className="flex justify-between text-sm text-gray-500">
+                      <span>{post.author?.full_name || 'Anonim'}</span>
+                      <div className="flex items-center gap-2">
+                        <span>{formatDate(post.publish_date)}</span>
+                        <span className="bg-gray-100 px-2 py-0.5 rounded">
+                          {post.status === 'published' ? 'Dipublikasikan' : 'Draft'}
+                        </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        Dokter: {appointment.doctor?.name || 'Tidak tersedia'}
-                      </p>
-                    </div>
-                    <Badge variant={appointment.status === 'active' ? 'default' : 'outline'}>
-                      {appointment.status === 'active' ? 'Aktif' : appointment.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
-                    </Badge>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4">Belum ada janji temu</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Doctors List */}
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Dokter</CardTitle>
-              <CardDescription>Daftar dokter di rumah sakit</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/admin/doctors">
-                Lihat Semua <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {doctors.length > 0 ? (
-                doctors.map((doctor) => (
-                  <div key={doctor.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={doctor.photo_url || ''} alt={doctor.name} />
-                      <AvatarFallback>{doctor.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{doctor.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {doctor.specialization?.name || 'Spesialis tidak tersedia'}
-                      </p>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4 col-span-3">Belum ada dokter</p>
-              )}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
