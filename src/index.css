@@ -157,7 +157,7 @@
   }
   
   .stagger-children.visible > *:nth-child(5) {
-    @apply opacity-100 translate-y-0 transition-all duration-500 delay-[400ms];
+    @apply opacity-100 translate-y-0 transition-all duration-500 delay-400;
   }
   
   .stagger-children.visible > *:nth-child(6) {

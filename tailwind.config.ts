@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -53,6 +54,9 @@ export default {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
+      transitionDelay: {
+        '400': '400ms',
+      },
   		backgroundImage: {
   			'hero-gradient': 'linear-gradient(-35deg, #1B9C85 0%, #FFFFFF 50%)'
   		},
