@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -60,21 +60,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Schedule, Doctor, ensureObject } from "@/lib/types";
 
-interface Doctor {
-  id: string;
-  name: string;
-}
-
-interface Schedule {
-  id: string;
-  doctor_id: string;
-  doctor?: { name: string };
-  days: string;
-  start_time: string;
-  end_time: string;
-  status: "active" | "inactive";
-}
-
 export default function Schedules() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
@@ -120,11 +105,12 @@ export default function Schedules() {
         });
         console.error("Fetch schedules error:", error);
       } else {
-        setSchedules(data.map(schedule => ({
+        const processedData = data.map((schedule: any) => ({
           ...schedule,
-          doctor: schedule.doctor || { name: 'Dokter Tidak Diketahui' }
-        })));
-        console.log("Schedules fetched:", data);
+          doctor: ensureObject(schedule.doctor)
+        }));
+        setSchedules(processedData);
+        console.log("Schedules fetched:", processedData);
       }
     };
 
@@ -211,7 +197,11 @@ export default function Schedules() {
       });
       console.error("Insert error:", error);
     } else {
-      setSchedules([...schedules, { ...data, doctor: data.doctor || { name: 'Dokter Tidak Diketahui' } }]);
+      const processedData = {
+        ...data,
+        doctor: ensureObject(data.doctor)
+      };
+      setSchedules([...schedules, processedData]);
       toast({
         title: "Jadwal Ditambahkan",
         description: "Jadwal berhasil ditambahkan.",
@@ -274,7 +264,11 @@ export default function Schedules() {
       });
       console.error("Update error:", error);
     } else {
-      setSchedules(schedules.map(s => s.id === data.id ? { ...data, doctor: data.doctor || { name: 'Dokter Tidak Diketahui' } } : s));
+      const processedData = {
+        ...data,
+        doctor: ensureObject(data.doctor)
+      };
+      setSchedules(schedules.map(s => s.id === data.id ? processedData : s));
       toast({
         title: "Jadwal Diperbarui",
         description: "Jadwal berhasil diperbarui.",

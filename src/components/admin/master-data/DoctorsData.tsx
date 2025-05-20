@@ -11,22 +11,26 @@ import { useToast } from "@/components/ui/use-toast";
 import { Doctor } from "@/lib/types";
 
 // Sample data - in a real app this would come from API/database
-const initialDoctors = [
+const initialDoctors: Doctor[] = [
   { 
     id: "1", 
     name: "Dr. Jane Smith", 
-    specialization: "Cardiology", 
-    imageUrl: "/placeholder.svg", 
+    specialization_id: "cardio",
+    specialization: { name: "Cardiology" }, 
+    photo_url: "/placeholder.svg", 
     bio: "Board certified cardiologist with 15 years of experience",
+    contact: "+1 (555) 123-4567",
     email: "jane.smith@medhub.com",
     phone: "+1 (555) 123-4567"
   },
   { 
     id: "2", 
     name: "Dr. John Davis", 
-    specialization: "Neurology", 
-    imageUrl: "/placeholder.svg", 
+    specialization_id: "neuro",
+    specialization: { name: "Neurology" }, 
+    photo_url: "/placeholder.svg", 
     bio: "Specializes in neurological disorders with focus on stroke prevention",
+    contact: "+1 (555) 234-5678",
     email: "john.davis@medhub.com",
     phone: "+1 (555) 234-5678"
   }
@@ -47,7 +51,7 @@ export function DoctorsData() {
 
   const filteredDoctors = doctors.filter((doctor) =>
     doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doctor.specialization.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doctor.bio?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -55,9 +59,11 @@ export function DoctorsData() {
     setCurrentDoctor({ 
       id: "", 
       name: "", 
-      specialization: "",
-      imageUrl: "/placeholder.svg",
+      specialization_id: "",
+      specialization: { name: "" },
       bio: "",
+      contact: "",
+      photo_url: "/placeholder.svg",
       email: "",
       phone: ""
     });
@@ -144,8 +150,8 @@ export function DoctorsData() {
               filteredDoctors.map((doctor) => (
                 <TableRow key={doctor.id}>
                   <TableCell className="font-medium">{doctor.name}</TableCell>
-                  <TableCell>{doctor.specialization}</TableCell>
-                  <TableCell>{doctor.email}</TableCell>
+                  <TableCell>{doctor.specialization.name}</TableCell>
+                  <TableCell>{doctor.email || doctor.contact}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
@@ -196,10 +202,14 @@ export function DoctorsData() {
               <div className="space-y-2">
                 <label htmlFor="specialization">Specialization</label>
                 <Select
-                  value={currentDoctor?.specialization || ""}
+                  value={currentDoctor?.specialization_id || ""}
                   onValueChange={(value) =>
                     setCurrentDoctor(
-                      (prev) => prev && { ...prev, specialization: value }
+                      (prev) => prev && { 
+                        ...prev, 
+                        specialization_id: value,
+                        specialization: { name: specializations.find(spec => spec.toLowerCase() === value.toLowerCase()) || value } 
+                      }
                     )
                   }
                 >
@@ -208,7 +218,7 @@ export function DoctorsData() {
                   </SelectTrigger>
                   <SelectContent>
                     {specializations.map((spec) => (
-                      <SelectItem key={spec} value={spec}>
+                      <SelectItem key={spec.toLowerCase()} value={spec.toLowerCase()}>
                         {spec}
                       </SelectItem>
                     ))}
@@ -235,7 +245,7 @@ export function DoctorsData() {
                   value={currentDoctor?.phone || ""}
                   onChange={(e) =>
                     setCurrentDoctor(
-                      (prev) => prev && { ...prev, phone: e.target.value }
+                      (prev) => prev && { ...prev, phone: e.target.value, contact: e.target.value }
                     )
                   }
                 />

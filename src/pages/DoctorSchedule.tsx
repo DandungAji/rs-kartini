@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -85,7 +86,7 @@ export default function DoctorSchedule() {
         ...schedule,
         doctor: {
           ...ensureObject(schedule.doctor),
-          specialization: ensureObject(schedule.doctor.specialization)
+          specialization: schedule.doctor?.specialization ? ensureObject(schedule.doctor.specialization) : undefined
         }
       })) as Schedule[];
     },

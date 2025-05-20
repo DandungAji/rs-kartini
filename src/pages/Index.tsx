@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { services } from "@/lib/mockData";
@@ -24,6 +24,8 @@ import SpecialtiesSection from '@/components/SpecialtiesSection';
 import { CalendarCheck, Award, Heart, Phone, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import SplitText from '/Reactbits/SplitText/SplitText';
+import BlurText from '/Reactbits/BlurText/BlurText';
 
 export default function Index() {
   // Featured services for the homepage

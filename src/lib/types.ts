@@ -20,6 +20,8 @@ export type Doctor = {
   contact: string;
   bio: string;
   photo_url: string;
+  email?: string;  // Added email property
+  phone?: string;  // Added phone property
 };
 
 export type Schedule = {
@@ -27,6 +29,10 @@ export type Schedule = {
   doctor_id: string;
   doctor?: {
     name: string;
+    specialization?: {
+      name: string;
+      id?: string;
+    };
   };
   days: string;
   start_time: string;
