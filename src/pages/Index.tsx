@@ -79,7 +79,7 @@ export default function Index() {
       <meta name="description" content="RS Kartini Bandung menyediakan layanan kesehatan komprehensif dengan tim medis ahli dan teknologi canggih. Temukan jadwal dokter, layanan unggulan, dan informasi kesehatan." />
       <meta property="og:title" content="RS Kartini Bandung - Rumah Sakit Pilihan Keluarga" />
       <meta property="og:description" content="RS Kartini Bandung menyediakan layanan kesehatan komprehensif dengan tim medis ahli dan teknologi canggih." />
-      <meta property="og:image" content="https://rskartini.id/images/cropped-logo.png" />
+      <meta property="og:image" content="https://rskartini.id/images/icon-logo.png" />
       <meta property="og:url" content="https://rskartini.id/" />
       <meta property="og:type" content="website" />
     </Helmet>
@@ -113,7 +113,7 @@ export default function Index() {
             <Parallax speed={-0.2} className="md:w-1/2">
               <div className="relative">
                 <img 
-                  src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                  src="images/rs-kartini.png" 
                   alt="RS Kartini Bandung" 
                   className="rounded-lg shadow-xl w-full hover-lift"
                 />
