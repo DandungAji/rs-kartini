@@ -45,9 +45,6 @@ export default function Navbar() {
                   {item.name}
                 </Link>
               ))}
-              <Link to="/admin">
-                <Button variant="outline" size="sm">Admin</Button>
-              </Link>
             </div>
             <div className="md:hidden">
               <button
@@ -79,13 +76,6 @@ export default function Navbar() {
                   {item.name}
                 </Link>
               ))}
-              <Link 
-                to="/admin" 
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Admin
-              </Link>
             </div>
           </div>
         )}
