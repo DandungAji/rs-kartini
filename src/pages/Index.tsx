@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
+import { Helmet } from 'react-helmet-async';
 import { Button } from "@/components/ui/button";
 import { services } from "@/lib/mockData";
 import Navbar from "@/components/Navbar";
@@ -72,6 +73,16 @@ export default function Index() {
   };
 
   return (
+    <>
+    <Helmet>
+      <title>RS Kartini Bandung - Rumah Sakit Pilihan Keluarga</title>
+      <meta name="description" content="RS Kartini Bandung menyediakan layanan kesehatan komprehensif dengan tim medis ahli dan teknologi canggih. Temukan jadwal dokter, layanan unggulan, dan informasi kesehatan." />
+      <meta property="og:title" content="RS Kartini Bandung - Rumah Sakit Pilihan Keluarga" />
+      <meta property="og:description" content="RS Kartini Bandung menyediakan layanan kesehatan komprehensif dengan tim medis ahli dan teknologi canggih." />
+      <meta property="og:image" content="https://rskartini.id/images/cropped-logo.png" />
+      <meta property="og:url" content="https://rskartini.id/" />
+      <meta property="og:type" content="website" />
+    </Helmet>
     <div className="overflow-x-hidden">
       <Navbar />
       
@@ -87,9 +98,9 @@ export default function Index() {
                 direction="top"
                 className="text-3xl md:text-5xl font-bold mb-6 text-foreground"
               />
-              <p className="text-lg md:text-l mb-8 text-muted">
+              <h1 className="text-lg md:text-l mb-8 text-muted">
                 Selalu pantau website kami untuk informasi eksklusif dan penawaran spesial
-              </p>
+              </h1>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Button asChild size="lg" className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90 hover-scale">
                   <Link to="/doctor-schedule">Cari Dokter</Link>
@@ -103,7 +114,7 @@ export default function Index() {
               <div className="relative">
                 <img 
                   src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                  alt="Medical professionals" 
+                  alt="RS Kartini Bandung" 
                   className="rounded-lg shadow-xl w-full hover-lift"
                 />
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary rounded-full animate-float opacity-80"></div>
@@ -183,8 +194,8 @@ export default function Index() {
           <div className="flex flex-col md:flex-row items-center">
             <AnimatedSection animationStyle="slide-up" className="md:w-1/2 mb-8 md:mb-0">
               <img 
-                src="https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                alt="Medical team" 
+                src="images/icu.jpeg" 
+                alt="Fasilitas ICU" 
                 className="rounded-lg shadow-lg hover-lift"
               />
             </AnimatedSection>
@@ -268,5 +279,6 @@ export default function Index() {
 
       <Footer />
     </div>
+    </>
   );
 }

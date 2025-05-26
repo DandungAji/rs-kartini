@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AnimatedSection from "@/components/AnimatedSection";
+import { Helmet } from "react-helmet-async";
 
 interface Doctor {
   id: string;
@@ -170,8 +171,15 @@ export default function DoctorSchedule() {
 
   return (
     <>
+      <Helmet>
+        <title>Jadwal Dokter - RS Kartini Bandung</title>
+        <meta name="description" content="Cari dan temukan jadwal praktik dokter spesialis di RS Kartini Bandung. Buat janji temu dengan mudah." />
+        <meta property="og:title" content="Jadwal Dokter - RS Kartini Bandung" />
+        <meta property="og:description" content="Cari dan temukan jadwal praktik dokter spesialis di RS Kartini Bandung." />
+        <meta property="og:url" content="https://rskartini.id/doctor-schedule" />
+      </Helmet>
+
       <Navbar />
-      
       <PageHeader 
         title="Jadwal Dokter" 
         subtitle="Cari dan pesan janji temu dengan profesional medis kami"

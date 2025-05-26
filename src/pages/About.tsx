@@ -1,5 +1,6 @@
 
 import Navbar from "@/components/Navbar";
+import { Helmet } from "react-helmet-async";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +9,13 @@ import AnimatedSection from "@/components/AnimatedSection";
 export default function About() {
   return (
     <>
+      <Helmet>
+        <title>Tentang - RS Kartini Bandung</title>
+        <meta name="description" content="Sejarah dan perjalanan RS Kartini Bandung. Sejak tahun 1988." />
+        <meta property="og:title" content="Tentang - RS Kartini Bandung" />
+        <meta property="og:description" content="Sejarah dan perjalanan RS Kartini Bandung." />
+        <meta property="og:url" content="https://rskartini.id/about" />
+      </Helmet>
       <Navbar />
       
       <PageHeader 
@@ -38,7 +46,7 @@ export default function About() {
             <div className="order-first md:order-last">
               <img 
                 src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                alt="Hospital building" 
+                alt="RS Kartini Bandung" 
                 className="rounded-lg shadow-lg w-full h-auto"
               />
             </div>
@@ -206,7 +214,7 @@ export default function About() {
             <div>
               <img 
                 src="https://images.unsplash.com/photo-1504439468489-c8920d796a29?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                alt="Hospital facilities" 
+                alt="Fasilitas RS Kartini" 
                 className="rounded-lg shadow-lg mb-4"
               />
               <h3 className="text-xl font-bold mb-2">Peralatan yang Canggih</h3>
@@ -218,7 +226,7 @@ export default function About() {
             <div>
               <img 
                 src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                alt="Medical technology" 
+                alt="Fasilitas RS Kartini" 
                 className="rounded-lg shadow-lg mb-4"
               />
               <h3 className="text-xl font-bold mb-2">Lingkungan yang Nyaman</h3>

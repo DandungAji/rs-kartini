@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -74,6 +75,14 @@ export default function Contact() {
   };
 
   return (
+    <>
+      <Helmet>
+        <title>Kontak Kami - RS Kartini Bandung</title>
+        <meta name="description" content="Hubungi tim kami untuk pertanyaan dan janji temu di RS Kartini Bandung. Buat janji temu dengan mudah." />
+        <meta property="og:title" content="Kontak Kami - RS Kartini Bandung" />
+        <meta property="og:description" content="Hubungi tim kami untuk pertanyaan dan janji temu di RS Kartini Bandung." />
+        <meta property="og:url" content="https://rskartini.id/contact" />
+      </Helmet>
     <div className="overflow-x-hidden">
       <Navbar />
       
@@ -251,5 +260,6 @@ export default function Contact() {
       
       <Footer />
     </div>
+    </>
   );
 }

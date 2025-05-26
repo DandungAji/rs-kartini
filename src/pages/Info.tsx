@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -120,6 +121,13 @@ export default function Info() {
 
   return (
     <>
+      <Helmet>
+        <title>Informasi Kesehatan - RS Kartini Bandung</title>
+        <meta name="description" content="Ketahui informasi, berita, acara dan hal lainnya di RS Kartini Bandung. Informasi terkini tentang RS Kartini Bandung." />
+        <meta property="og:title" content="Informasi Kesehatan - RS Kartini Bandung" />
+        <meta property="og:description" content="Ketahui informasi, berita, acara dan hal lainnya di RS Kartini Bandung." />
+        <meta property="og:url" content="https://rskartini.id/info" />
+      </Helmet>
       <Navbar />
 
       <PageHeader
