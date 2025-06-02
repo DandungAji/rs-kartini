@@ -154,8 +154,8 @@ export default function Index() {
               <Parallax speed={-0.2} className="md:w-1/2">
                 <div className="relative">
                   <img
-                    src="images/yesus-kristus.jpeg"
-                    alt="Peringatan Hari Kenaikan Yesus Kristus"
+                    src="images/rs-kartini.png"
+                    alt="RS Kartini Bandung"
                     className="rounded-lg shadow-xl w-full hover-lift"
                   />
                   <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary rounded-full animate-float opacity-80"></div>
