@@ -153,10 +153,15 @@ export default function Index() {
               </div>
               <Parallax speed={-0.2} className="md:w-1/2">
                 <div className="relative">
-                  <img
+                  {/* <img
                     src="images/rs-kartini.png"
                     alt="RS Kartini Bandung"
                     className="rounded-lg shadow-xl w-full hover-lift"
+                  /> */}
+                  <img
+                    src="images/cuti-idul-adha.jpg"
+                    alt="Informasi Cuti Idul Adha"
+                    className="rounded-lg shadow-xl w-50% hover-lift"
                   />
                   <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary rounded-full animate-float opacity-80"></div>
                   <div
