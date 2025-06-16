@@ -2,14 +2,13 @@
   RewriteEngine On
   RewriteBase /
 
-  # --- Redirect link ---
-  Redirect 301 /beranda/tentang /about
-  Redirect 301 /beranda/jadwal-dokter /doctor-schedule
-  Redirect 301 /beranda/layanan-kami /services
-  Redirect 301 /beranda/kontak /contact
-  Redirect 301 /beranda/info-kesehatan /info
+  # --- Redirect Link ---
+  Redirect 301 /beranda/tentang/ /about
+  Redirect 301 /beranda/jadwal-dokter/ /doctor-schedule
+  Redirect 301 /beranda/layanan/ /services
+  Redirect 301 /beranda/kontak/ /contact
+  Redirect 301 /beranda/info-kesehatan/ /info
 
-  # --- Aturan SPA (yang sudah ada) ---
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
