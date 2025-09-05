@@ -154,7 +154,8 @@ export default function Index() {
               <Parallax speed={-0.2} className="md:w-1/2">
                 <div className="relative">
                   <img
-                    src="images/rs-kartini.png"
+                    // src="images/rs-kartini.png"
+                    src="images/maulid.jpeg"
                     alt="RS Kartini Bandung"
                     className="rounded-lg shadow-xl w-full hover-lift"
                   />
