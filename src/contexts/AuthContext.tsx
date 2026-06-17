@@ -25,7 +25,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
         if (error) {
           console.error("Get user error:", error.message);
           throw error;
@@ -34,9 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (user) {
           console.log("Fetched user:", user.id, user.email);
           const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('id, username, full_name, email, phone, role')
-            .eq('id', user.id)
+            .from("profiles")
+            .select("id, username, full_name, email, phone, role")
+            .eq("id", user.id)
             .single();
 
           if (profileError) {
@@ -48,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 ...user.user_metadata,
                 username: user.user_metadata?.username || user.email,
                 full_name: user.user_metadata?.full_name || user.email,
-                role: user.user_metadata?.role || 'author',
+                role: user.user_metadata?.role || "author",
               },
             });
           } else {
@@ -61,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 full_name: profile.full_name || user.email,
                 email: profile.email || user.email,
                 phone: profile.phone,
-                role: profile.role || user.user_metadata?.role || 'author',
+                role: profile.role || user.user_metadata?.role || "author",
               },
             });
           }
@@ -78,14 +81,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     fetchUser();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (event === 'SIGNED_OUT') {
-        navigate('/login');
-      }
-    });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        if (event === "SIGNED_OUT") {
+          navigate("/login");
+        }
+      },
+    );
 
     return () => {
       authListener.subscription.unsubscribe();
@@ -97,16 +102,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("Attempting signIn with identifier:", identifier);
       let email = identifier;
 
-      if (!identifier.includes('@')) {
+      if (!identifier.includes("@")) {
         const { data, error } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('username', identifier)
+          .from("profiles")
+          .select("email")
+          .eq("username", identifier)
           .single();
 
         console.log("Username query result:", { data, error });
         if (error || !data?.email) {
-          throw new Error("Username tidak ditemukan");
+          throw new Error("Username atau kata sandi salah");
         }
         email = data.email;
       }
@@ -119,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error("Auth error:", error);
-        if (error.message.includes('Invalid login credentials')) {
+        if (error.message.includes("Invalid login credentials")) {
           throw new Error("Username atau kata sandi salah");
         }
         throw new Error(error.message);
@@ -146,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
       setUser(null);
-      navigate('/login');
+      navigate("/login");
       console.log("Signed out successfully");
     } catch (error: any) {
       console.error("SignOut error:", error.message);
