@@ -2,16 +2,16 @@
   RewriteEngine On
   RewriteBase /
 
-  # --- Redirect Link ---
-  Redirect 301 /beranda/tentang/ /about
-  Redirect 301 /beranda/jadwal-dokter/ /doctor-schedule
-  Redirect 301 /beranda/layanan/ /services
-  Redirect 301 /beranda/kontak/ /contact
-  Redirect 301 /beranda/info-kesehatan/ /info
+RewriteRule ^beranda/tentang/?$ /about [R=301,L]
+RewriteRule ^beranda/jadwal-dokter/?$ /doctor-schedule [R=301,L]
+RewriteRule ^beranda/layanan/?$ /services [R=301,L]
+RewriteRule ^beranda/kontak/?$ /contact [R=301,L]
+RewriteRule ^beranda/info-kesehatan/?$ /info [R=301,L]
 
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME} !-l
-  RewriteRule . /index.html [L]
+RewriteCond %{REQUEST_FILENAME} -f [or]
+RewriteCond %{REQUEST_FILENAME} -d [or]
+RewriteCond %{REQUEST_FILENAME} -l
+RewriteRule ^ - [L]
+
+RewriteRule . /index.html [L]
 </IfModule>
